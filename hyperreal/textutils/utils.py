@@ -1,4 +1,6 @@
 from _collections import namedtuple
+import re
+from termcolor import colored
 
 
 def lemmatize(token, lemma_dict):
@@ -101,6 +103,7 @@ def words_matching_context(text, contexts, width, lemma_dict):
     words = []
     tokens = text.split(" ")
     tokens = [lemmatize(token, lemma_dict) for token in tokens]
+
     for i in range(len(tokens)):
         wic = word_in_context(i, tokens, width)
 
@@ -129,3 +132,48 @@ def get_new_names(texts, contexts, keywords, width, lemma_dict):
                 new_keywords.append(word)
 
     return new_keywords
+
+
+def clear_tags(text):
+    """
+    Clear text of tags created by crawler.
+    :param text: string containing text to clear of rags
+    :return: string of cleared text
+    """
+    def find_tags(t):
+        """Find the tags created by the crawler (?) and return MatchObject of matches."""
+        return re.search(r'\{:tag\s*.*\s*:content\s*\[\s*"?(.*)?"?\s*\]\s*.*\s*\}', t, re.M)
+
+    s = find_tags(text)
+
+    while s is not None and len(s.groups()) > 0:
+        text = text.replace(s.group(0), s.group(1))
+        s = find_tags(text)
+
+    return text
+
+
+# TODO: ta funkcja może się przydać w innej formie
+def find_phrase(phrase, df, column="content", limit=None):
+    """
+    Print the text with highlighted phrase occurrences.
+    :param column: the column containing texts to analise
+    :param phrase: string with phrase to highlight
+    :param df: dataframe containing texts in which to search for phrase occurrences
+    :param limit: int number limiting the amount of posts to analise
+    :return: print the text with highlighted phrase
+    """
+    results = df[df[column].str.contains(phrase)][column].values
+    i = 0
+
+    # warning: cumcount may not work as it should? I'm not sure, was originally only i instead of index
+    for r, index in results, results.cumcount():
+
+        if limit is not None and index >= limit:
+            return
+
+        i += 1
+        r = clear_tags(r)
+        words = r.split(' ')
+        print(' '.join([colored(w, on_color='on_green') if phrase in w else w for w in words]))
+        print('\n----------------------\n')
