@@ -116,7 +116,7 @@ def words_matching_context(text, contexts, width, lemma_dict):
 
 def get_new_names(texts, contexts, keywords, width, lemma_dict):
     """
-    Get a list of new potential names for keywords (i.e. drug names).
+    Get a list of new potential names for keywords (i.e. drug names for drugs).
     :param texts: list of string lists containing texts to analise
     :param contexts: list of WordInContext tuples to compare contexts to, must be same width as width param
     :param keywords: list of strings containing words we are looking for alternatives for
@@ -177,3 +177,35 @@ def find_phrase(phrase, df, column="content", limit=None):
         words = r.split(' ')
         print(' '.join([colored(w, on_color='on_green') if phrase in w else w for w in words]))
         print('\n----------------------\n')
+
+
+def get_other_form_dict(drugs):
+    """
+    Get a dictionary with other names for a drug and alternative forms of the drug name.
+    :param drugs: dataframe containing drug data (narkopedia)
+    :return: dictionary (string: {string, string}) of drug name and alternative name forms and names
+    """
+    results = {}
+
+    for row in drugs.iterrows():
+        results[row[1]['name']] = {
+            'other-forms': row[1]['other-forms'],
+            'other-names': row[1]['other-names']
+        }
+
+    return results
+
+
+def find_drug_forums(forums, drugs_name):
+    """
+    Find forums with names containing names of drugs.
+    :param drugs_name: list of strings containing drugs name
+    :param forums: dataframe with forum data, including forum names
+    :return: dataframe of forum infos with looked-for names
+    """
+    predicate = forums['name'].str.lower().str.contains(drugs_name[0])
+
+    for d in drugs_name[1:]:
+        predicate = (predicate | forums['name'].str.lower().str.contains(d[:3]))
+
+    return forums[predicate]
