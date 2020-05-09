@@ -1,7 +1,7 @@
+from datetime import date, timedelta
 import regex as re
 from hyperreal.textutils.utils import lemmatize
 from unidecode import unidecode
-from textsearch import TextSearch
 
 
 def clean(text, use_lemmas=False, is_post=False):
@@ -45,20 +45,37 @@ def clean(text, use_lemmas=False, is_post=False):
     return text
 
 
-def search(query, docs):
+def normalize_date(raw_date):
     """
-    Find docs containing matching query.
-    :param query: list of strings a doc has to contain to be returned
-    :param docs: list of strings (docs) to be searched
-    :return: list containing docs with query
+    Makes sure date is in correct format dd/mm/yyyy.
+    :param raw_date: string containing date to be processed
+    :return: string containing normalized date
     """
-    ts = TextSearch(case="ignore", returns="match")
-    ts.add(query)
+    if raw_date == 'dzisiaj':
+        return date.today().strftime("%d/%m/%Y")
+    if raw_date == 'wczoraj':
+        return (date.today() - timedelta(days=1)).strftime("%d/%m/%Y")
 
-    results = []
+    # [day, raw_month, year] = raw_date.split()
+    day, raw_month, year = raw_date.split()
 
-    for doc in docs:
-        if ts.contains(doc):
-            results.append(doc)
+    month = {
+        'stycznia': '01',
+        'lutego': '02',
+        'marca': '03',
+        'kwietnia': '04',
+        'maja': '05',
+        'czerwca': '06',
+        'lipca': '07',
+        'sierpnia': '08',
+        'września': '09',
+        'października': '10',
+        'listopada': '11',
+        'grudnia': '12',
+    }.get(raw_month)
 
-    return results
+    if month is None:
+        return (date.today()+timedelta(days=1)).strftime("%d/%m/%Y")
+
+    return "{}/{}/{}".format(day, month, year)
+

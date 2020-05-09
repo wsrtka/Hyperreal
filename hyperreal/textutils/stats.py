@@ -19,7 +19,7 @@ def get_word_freq(filename, split_char):
     return word_freq
 
 
-def compute_tf_idf(term, terms_freq, docs_terms, docs_count):
+def get_tf_idf(term, terms_freq, docs_terms, docs_count):
     """
     Compute the product of term frequency and inverse data frequency.
     :param docs_count: int with the number of docs

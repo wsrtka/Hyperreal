@@ -1,10 +1,9 @@
 from _collections import namedtuple
 import re
-from gensim import models, utils
+from gensim import utils
 import nlp as nlp
 from termcolor import colored
-from datetime import date, timedelta
-
+from textsearch import TextSearch
 from hyperreal.textutils.cleaning import clean
 
 def tokenize(text):
@@ -52,6 +51,39 @@ def get_lemma_dict(filename, split_char):
                     lemma_dict[word] = lemma
 
     return lemma_dict
+
+
+def get_narkopedia_map(narkopedia):
+    """
+    Read data from narkopedia and create a dictionary with drug names and alternative names.
+    :param narkopedia: dataframe containing narkopedia data, must include "other-forms", "generic-names" and "other-names" columns
+    :return: dictionary containing drug names and respective alternative names
+    """
+    def names(cell):
+        val = str(cell)
+
+        if val == "[]":
+            return []
+
+        val = val[1:-1]
+        val = val.split(", ")
+        val = [v.replace("'", "").strip().lower() for v in val]
+
+        return val
+
+    results = {}
+
+    for _, row in narkopedia.iterrows():
+        other = list(
+            set(
+                names(row["other-forms"])
+                + names(row["generic-names"])
+                + names(row["other-names"])
+            )
+        )
+        results[row["name"].lower()] = other
+
+    return results
 
 
 WordInContext = namedtuple("WordInContext", ["left_context", "word", "right_context"])
@@ -208,6 +240,25 @@ def get_other_form_dict(drugs):
     return results
 
 
+def search(query, docs):
+    """
+    Find docs containing matching query.
+    :param query: list of strings a doc has to contain to be returned
+    :param docs: list of strings (docs) to be searched
+    :return: list containing docs with query
+    """
+    ts = TextSearch(case="ignore", returns="match")
+    ts.add(query)
+
+    results = []
+
+    for doc in docs:
+        if ts.contains(doc):
+            results.append(doc)
+
+    return results
+
+
 def find_drug_forums(forums, drugs_name):
     """
     Find forums with names containing names of drugs.
@@ -221,41 +272,6 @@ def find_drug_forums(forums, drugs_name):
         predicate = (predicate | forums['name'].str.lower().str.contains(d[:3]))
 
     return forums[predicate]
-
-
-def normalize_date(raw_date):
-    """
-    Makes sure date is in correct format dd/mm/yyyy.
-    :param raw_date: string containing date to be processed
-    :return: string containing normalized date
-    """
-    if raw_date == 'dzisiaj':
-        return date.today().strftime("%d/%m/%Y")
-    if raw_date == 'wczoraj':
-        return (date.today() - timedelta(days=1)).strftime("%d/%m/%Y")
-
-    # [day, raw_month, year] = raw_date.split()
-    day, raw_month, year = raw_date.split()
-
-    month = {
-        'stycznia': '01',
-        'lutego': '02',
-        'marca': '03',
-        'kwietnia': '04',
-        'maja': '05',
-        'czerwca': '06',
-        'lipca': '07',
-        'sierpnia': '08',
-        'września': '09',
-        'października': '10',
-        'listopada': '11',
-        'grudnia': '12',
-    }.get(raw_month)
-
-    if month is None:
-        return (date.today()+timedelta(days=1)).strftime("%d/%m/%Y")
-
-    return "{}/{}/{}".format(day, month, year)
 
 
 def get_sentences(posts, content_col="content"):
@@ -275,3 +291,13 @@ def get_sentences(posts, content_col="content"):
                 sents.append(utils.simple_preprocess(sentence))
 
     return sents
+
+
+def term_filter(terms, predicate):
+    """
+    Checks if given terms are valid using predicate.
+    :param terms: list of string terms to check
+    :param predicate: function representing condition a term has to fulfill in order to be valid
+    :return: True if all of the terms fulfill condition
+    """
+    return [t for t in terms if not predicate(t)] == []
