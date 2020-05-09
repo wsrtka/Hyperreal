@@ -1,6 +1,7 @@
 from _collections import namedtuple
 import re
 from termcolor import colored
+from datetime import date, timedelta
 
 
 def lemmatize(token, lemma_dict):
@@ -209,3 +210,38 @@ def find_drug_forums(forums, drugs_name):
         predicate = (predicate | forums['name'].str.lower().str.contains(d[:3]))
 
     return forums[predicate]
+
+
+def normalize_date(raw_date):
+    """
+    Makes sure date is in correct format dd/mm/yyyy.
+    :param raw_date: string containing date to be processed
+    :return: string containing normalized date
+    """
+    if raw_date == 'dzisiaj':
+        return date.today().strftime("%d/%m/%Y")
+    if raw_date == 'wczoraj':
+        return (date.today() - timedelta(days=1)).strftime("%d/%m/%Y")
+
+    # [day, raw_month, year] = raw_date.split()
+    day, raw_month, year = raw_date.split()
+
+    month = {
+        'stycznia': '01',
+        'lutego': '02',
+        'marca': '03',
+        'kwietnia': '04',
+        'maja': '05',
+        'czerwca': '06',
+        'lipca': '07',
+        'sierpnia': '08',
+        'września': '09',
+        'października': '10',
+        'listopada': '11',
+        'grudnia': '12',
+    }.get(raw_month)
+
+    if month is None:
+        return (date.today()+timedelta(days=1)).strftime("%d/%m/%Y")
+
+    return "{}/{}/{}".format(day, month, year)
