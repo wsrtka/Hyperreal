@@ -7,6 +7,13 @@ from datetime import date, timedelta
 
 from hyperreal.textutils.cleaning import clean
 
+def tokenize(text):
+    """
+    Split text into tokens.
+    :param text: string text to split
+    :return: list of strings created by splitting text by empty spaces
+    """
+    return text.split(" ")
 
 def lemmatize(token, lemma_dict):
     """
