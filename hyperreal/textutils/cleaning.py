@@ -4,16 +4,22 @@ from unidecode import unidecode
 from textsearch import TextSearch
 
 
-def clean(text, use_lemmas=True):
+def clean(text, use_lemmas=False, is_post=False):
     """
     Clean text from unnecessary symbols.
     :param text: string containing text to clean
     :param use_lemmas: if True, text returned text will be lemmatized
+    :param is_post: if True, text is cleaned assuming it is a post
     :return: string containing cleaned text
     """
     text = re.sub(r"\n", " ", text)
     text = re.sub(r"\\n", " ", text)
     text = re.sub(r"\t", " ", text)
+
+    if not is_post:
+        text.strip()
+        return text
+
     text = re.sub(r"http[^\s]+", " ", text)
     text = re.sub(r"images[^\s]+", " ", text)
     text = re.sub(r":D|:p|:P|:d", " ", text)

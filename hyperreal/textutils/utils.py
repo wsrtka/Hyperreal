@@ -1,7 +1,11 @@
 from _collections import namedtuple
 import re
+from gensim import models, utils
+import nlp as nlp
 from termcolor import colored
 from datetime import date, timedelta
+
+from hyperreal.textutils.cleaning import clean
 
 
 def lemmatize(token, lemma_dict):
@@ -245,3 +249,22 @@ def normalize_date(raw_date):
         return (date.today()+timedelta(days=1)).strftime("%d/%m/%Y")
 
     return "{}/{}/{}".format(day, month, year)
+
+
+def get_sentences(posts, content_col="content"):
+    """
+    Get sentences from posts.
+    :param posts: dataframe with posts data
+    :param content_col: string containing content column name
+    :return: array of strings containing sentences
+    """
+    sents = []
+    for content in posts[content_col].values:
+        doc = nlp(clean(content))
+
+        for s in doc.sents:
+            if len(s) > 2:
+                sentence = s.text.strip()
+                sents.append(utils.simple_preprocess(sentence))
+
+    return sents
