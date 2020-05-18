@@ -30,14 +30,18 @@ def get_posts_per_year(df):
 
 
 # TODO: Uogolnić?
-def get_most_active_authors(df, top=10):
+def get_most_active_authors(df, top=10, forum=None):
     """
     Get the top most active authors ready to plot.
     :param df: dataframe containing posts with author information
     :param top: int number of top authors to plot
+    :param forum: string containing forum name
     :return: object ready to plot
     """
     # to apply: .plot.barh( );
+    if forum is not None:
+        df = df[df['name'] == forum]
+
     return df.groupby('author').count()['post_id'].sort_values(ascending=False)[:top]
 
 
