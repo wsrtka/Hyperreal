@@ -210,10 +210,9 @@ def find_phrase(phrase, df, column="content", limit=None):
     results = df[df[column].str.contains(phrase)][column].values
     i = 0
 
-    # warning: cumcount may not work as it should? I'm not sure, was originally only i instead of index
-    for r, index in results, results.cumcount():
+    for r in results:
 
-        if limit is not None and index >= limit:
+        if limit is not None and i >= limit:
             return
 
         i += 1
