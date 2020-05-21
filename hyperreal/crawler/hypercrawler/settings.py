@@ -13,8 +13,8 @@ import logging
 
 BOT_NAME = 'hyperreal'
 
-SPIDER_MODULES = ['hyperreal.spiders']
-NEWSPIDER_MODULE = 'hyperreal.spiders'
+SPIDER_MODULES = ['hypercrawler.spiders']
+NEWSPIDER_MODULE = 'hypercrawler.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'hyperreal (+http://www.yourdomain.com)'

@@ -1,6 +1,6 @@
 import scrapy
 from scrapy.loader import ItemLoader
-from hyperreal.items import *
+from hyperreal.crawler.hypercrawler.items import *
 
 
 class PostSpider(scrapy.Spider):
@@ -18,8 +18,8 @@ class PostSpider(scrapy.Spider):
         Follows subforum links.
 
         :param response: scrapy crawl resposne
-        :returns :class:`hyperreal.items.PostItem`,
-        :class:`hyperreal.items.ForumItem`, :class:`hyperreal.items.TopicItem`
+        :returns :class:`hyperreal.crawler.hypercrawler.items.PostItem`,
+        :class:`hyperreal.crawler.hypercrawler.items.ForumItem`, :class:`hypercrawler.items.TopicItem`
         """
         subforums = response.css('a.forumtitle::attr(href)').getall()
         for forum in subforums:

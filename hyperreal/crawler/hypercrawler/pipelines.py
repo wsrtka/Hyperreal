@@ -1,7 +1,8 @@
-from hyperreal.items import *
+from hyperreal.crawler.hypercrawler.items import *
 import csv
 import re
 import w3lib.html
+from hyperreal.crawler.constants import *
 
 
 class HyperrealPipeline:
@@ -11,9 +12,9 @@ class HyperrealPipeline:
         Called during spider startup. Opens and truncates output files and prepares csv writers.
         :param start_requests: Starting requests for the spider
         """
-        self.forum_file = open('forums.csv', 'w', newline='', encoding='utf-8')
-        self.topic_file = open('topics.csv', 'w', newline='', encoding='utf-8')
-        self.post_file = open('posts.csv', 'w', newline='', encoding='utf-8')
+        self.forum_file = open(FORUMS_FILE_NAME, 'w', newline='', encoding='utf-8')
+        self.topic_file = open(TOPICS_FILE_NAME, 'w', newline='', encoding='utf-8')
+        self.post_file = open(POSTS_FILE_NAME, 'w', newline='', encoding='utf-8')
 
         self.forum_writer = csv.writer(self.forum_file)
         self.topic_writer = csv.writer(self.topic_file)
@@ -31,8 +32,8 @@ class HyperrealPipeline:
     def process_item(self, item, spider):
         """
         Processes scraped item and saves it in a output file accordingly
-        :param item: Item to process. Might be a :class:`hyperreal.items.PostItem`,
-        :class:`hyperreal.items.ForumItem` or :class:`hyperreal.items.TopicItem`
+        :param item: Item to process. Might be a :class:`hyperreal.crawler.hypercrawler.items.PostItem`,
+        :class:`hyperreal.crawler.hypercrawler.items.ForumItem` or :class:`hypercrawler.items.TopicItem`
         :param spider: a spider
         """
         if isinstance(item, ForumItem):
