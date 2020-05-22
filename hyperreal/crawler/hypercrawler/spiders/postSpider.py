@@ -42,18 +42,23 @@ class PostSpider(scrapy.Spider):
             next_request = response.urljoin(forum)
             yield scrapy.Request(next_request, callback=self.parse_forum)
 
-        yield from self.parse_forum_page(response)
+        yield from self.parse_forum_page(response, response.url)
 
-    def parse_forum_page(self, response):
+    def parse_forum_page(self, response, forum_url=None):
         """
         Forum page callback. Parses TopicItem.
         Follows next forum page and threads.
+        :param forum_url: forum url, from first page. Will be extracted from response meta if not provided.
         :param response: scrapy crawl response
         """
+        if forum_url is None:
+            forum_url = response.meta['forum_url']
+
         next_page = response.css('a[rel=next]::attr(href)').get()
         if next_page:
             next_request = response.urljoin(next_page)
-            yield scrapy.Request(next_request, callback=self.parse_forum_page)
+            yield scrapy.Request(next_request, callback=self.parse_forum_page,
+                                 meta={'forum_url': forum_url})
 
         threads = response.css('a.topictitle')
         for thread in threads:
@@ -61,7 +66,8 @@ class PostSpider(scrapy.Spider):
             thread_href_selector = thread.css('a::attr(href)')
             thread_link = response.urljoin(thread_href_selector.get())
             topic_loader.add_value('id', thread_href_selector.re(r'-(t[0-9]*).html'))
-            topic_loader.add_value('link', thread_link)
+            topic_loader.add_value('thread_link', thread_link)
+            topic_loader.add_value('forum_link', forum_url)
             topic_loader.add_value('name', thread.css('a::text').get())
             yield topic_loader.load_item()
             yield scrapy.Request(thread_link, callback=self.parse_thread)

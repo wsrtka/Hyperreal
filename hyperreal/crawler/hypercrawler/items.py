@@ -14,7 +14,8 @@ class TopicItem(scrapy.Item):
     Represents a forum thread
     """
     id = scrapy.Field()
-    link = scrapy.Field()
+    thread_link = scrapy.Field()
+    forum_link = scrapy.Field()
     name = scrapy.Field()
 
 

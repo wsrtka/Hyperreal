@@ -61,7 +61,10 @@ class HyperrealPipeline:
         Process TopicItem and save it to the output file
         :param item: TopicItem to process
         """
-        self.topic_writer.writerow([item['id'][0], item['link'][0], item['name'][0]])
+        forum_id_match = re.compile(r'.*/talk/(.*)\.html$').match(item['forum_link'][0])
+        if forum_id_match is not None:
+            self.topic_writer.writerow(
+                [item['id'][0], forum_id_match.group(1), item['thread_link'][0], item['name'][0]])
         return item
 
     def handle_post(self, item):
