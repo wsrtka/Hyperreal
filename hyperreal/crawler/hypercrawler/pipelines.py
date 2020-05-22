@@ -2,19 +2,27 @@ from hyperreal.crawler.hypercrawler.items import *
 import csv
 import re
 import w3lib.html
+import os
 from hyperreal.crawler.constants import *
 
 
 class HyperrealPipeline:
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.settings.get('OUTPUT_DIRECTORY'))
+
+    def __init__(self, output_directory):
+        self.output_directory = output_directory
 
     def open_spider(self, start_requests):
         """
         Called during spider startup. Opens and truncates output files and prepares csv writers.
         :param start_requests: Starting requests for the spider
         """
-        self.forum_file = open(FORUMS_FILE_NAME, 'w', newline='', encoding='utf-8')
-        self.topic_file = open(TOPICS_FILE_NAME, 'w', newline='', encoding='utf-8')
-        self.post_file = open(POSTS_FILE_NAME, 'w', newline='', encoding='utf-8')
+        self.forum_file = open(os.path.join(self.output_directory, FORUMS_FILE_NAME), 'w', newline='', encoding='utf-8')
+        self.topic_file = open(os.path.join(self.output_directory, TOPICS_FILE_NAME), 'w', newline='', encoding='utf-8')
+        self.post_file = open(os.path.join(self.output_directory, POSTS_FILE_NAME), 'w', newline='', encoding='utf-8')
 
         self.forum_writer = csv.writer(self.forum_file)
         self.topic_writer = csv.writer(self.topic_file)
