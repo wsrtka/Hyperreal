@@ -94,7 +94,7 @@ class PostSpider(scrapy.Spider):
                 if last_post_date < self.start_date:
                     continue
 
-            yield scrapy.Request(thread_link, callback=self.parse_thread)
+            yield scrapy.Request(thread_link + "?sd=d", callback=self.parse_thread)
 
     def parse_thread(self, response):
         """
