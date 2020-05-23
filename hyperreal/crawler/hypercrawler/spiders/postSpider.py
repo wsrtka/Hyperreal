@@ -1,12 +1,17 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from hyperreal.crawler.hypercrawler.items import *
+from hyperreal.crawler.dateutil import parse_date
 
 
 class PostSpider(scrapy.Spider):
     """
     Scrapy spider. Crawls hyperreal.info forum and extracts subforum names, thread names and post contents
     """
+
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+    #
     name = "posts"
 
     allowed_domains = ["hyperreal.info"]
@@ -21,6 +26,11 @@ class PostSpider(scrapy.Spider):
         :returns :class:`hyperreal.crawler.hypercrawler.items.PostItem`,
         :class:`hyperreal.crawler.hypercrawler.items.ForumItem`, :class:`hypercrawler.items.TopicItem`
         """
+        date = self.settings.get('START_DATE')
+        self.full_crawl = date is None
+        if not self.full_crawl:
+            self.start_date = date
+
         subforums = response.css('a.forumtitle::attr(href)').getall()
         for forum in subforums:
             next_request = response.urljoin(forum)
@@ -60,8 +70,15 @@ class PostSpider(scrapy.Spider):
             yield scrapy.Request(next_request, callback=self.parse_forum_page,
                                  meta={'forum_url': forum_url})
 
-        threads = response.css('a.topictitle')
-        for thread in threads:
+        # threads = response.css('a.topictitle')
+        threads = response.css(
+            'div.topic_read,div.topic_read_hot,div.topic_read_locked,div.topic_moved,div.sticky_read,'
+            'div.sticky_read_locked,div.announce_read,div.announce_read_locked')
+        # if len(threads) != len(threads2):
+        #     print(response.url)
+        for thread_container in threads:
+
+            thread = thread_container.css('a.topictitle')
             topic_loader = ItemLoader(item=TopicItem(), response=response)
             thread_href_selector = thread.css('a::attr(href)')
             thread_link = response.urljoin(thread_href_selector.get())
@@ -70,6 +87,13 @@ class PostSpider(scrapy.Spider):
             topic_loader.add_value('forum_link', forum_url)
             topic_loader.add_value('name', thread.css('a::text').get())
             yield topic_loader.load_item()
+
+            if not self.full_crawl:
+                last_post_date_string = thread_container.css('span.post-date::text').get()
+                last_post_date = parse_date(last_post_date_string)
+                if last_post_date < self.start_date:
+                    continue
+
             yield scrapy.Request(thread_link, callback=self.parse_thread)
 
     def parse_thread(self, response):

@@ -10,19 +10,30 @@ class HyperrealPipeline:
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(crawler.settings.get('OUTPUT_DIRECTORY'))
+        settings = crawler.settings
+        return cls(settings.get('OUTPUT_DIRECTORY'), settings.get('START_DATE'))
 
-    def __init__(self, output_directory):
+    def __init__(self, output_directory, start_date):
         self.output_directory = output_directory
+        self.start_date = start_date
 
     def open_spider(self, start_requests):
         """
         Called during spider startup. Opens and truncates output files and prepares csv writers.
         :param start_requests: Starting requests for the spider
         """
-        self.forum_file = open(os.path.join(self.output_directory, FORUMS_FILE_NAME), 'w', newline='', encoding='utf-8')
-        self.topic_file = open(os.path.join(self.output_directory, TOPICS_FILE_NAME), 'w', newline='', encoding='utf-8')
-        self.post_file = open(os.path.join(self.output_directory, POSTS_FILE_NAME), 'w', newline='', encoding='utf-8')
+
+        def open_output_file(file_name):
+            return open(os.path.join(self.output_directory, file_name), 'w', newline='', encoding='utf-8')
+
+        if self.start_date is None:
+            self.forum_file = open_output_file(FORUMS_FILE_NAME)
+            self.topic_file = open_output_file(TOPICS_FILE_NAME)
+            self.post_file = open_output_file(POSTS_FILE_NAME)
+        else:
+            self.forum_file = open_output_file(FORUMS_TO_APPEND_FILE_NAME)
+            self.topic_file = open_output_file(TOPICS_TO_APPEND_FILE_NAME)
+            self.post_file = open_output_file(POSTS_TO_APPEND_FILE_NAME)
 
         self.forum_writer = csv.writer(self.forum_file)
         self.topic_writer = csv.writer(self.topic_file)
