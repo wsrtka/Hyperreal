@@ -89,8 +89,8 @@ class PostSpider(scrapy.Spider):
             yield topic_loader.load_item()
 
             if not self.full_crawl:
-                last_post_date_string = thread_container.css('span.post-date::text').get()
-                last_post_date = parse_date(last_post_date_string)
+                last_post_date_candidates = thread_container.css('span.post-date::text').getall()
+                last_post_date = max(map(lambda x: parse_date(x), last_post_date_candidates))
                 if last_post_date < self.start_date:
                     continue
 
@@ -102,20 +102,28 @@ class PostSpider(scrapy.Spider):
         Follows next thread page.
         :param response: scrapy crawl response
         """
-        next_page = response.css('a[rel=next]::attr(href)').get()
-        if next_page:
-            next_request = response.urljoin(next_page)
-            yield scrapy.Request(next_request, callback=self.parse_thread)
 
         posts = response.css('div.post.panel-body')
         post_number = 1
+        too_old_post_found = False
         for post in posts:
             post_loader = ItemLoader(item=PostItem(), selector=post)
             post_loader.add_value('username', post.css('a.username-coloured::text,a.username::text').get())
-            post_loader.add_value('date', post.css('div.post-date::text')[1].get()[3:-1])
+            post_date_string = post.css('div.post-date::text')[1].get()[3:-1]
+            post_date = parse_date(post_date_string)
+            post_loader.add_value('date', str(post_date))
             post_loader.add_value('post_id', post.css('div.post-date > a::attr(href)').re(r'.html#(.*)'))
             post_loader.add_value('thread_url', response.request.url)
             post_loader.add_value('post_number', post_number)
             post_number += 1
             post_loader.add_value('content', post.css('div.content').get())
+            if not self.full_crawl:
+                if post_date < self.start_date:
+                    too_old_post_found = True
+                    continue
             yield post_loader.load_item()
+
+        next_page = response.css('a[rel=next]::attr(href)').get()
+        if next_page and not too_old_post_found:
+            next_request = response.urljoin(next_page)
+            yield scrapy.Request(next_request, callback=self.parse_thread)
