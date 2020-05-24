@@ -64,20 +64,14 @@ class PostSpider(scrapy.Spider):
         if forum_url is None:
             forum_url = response.meta['forum_url']
 
-        next_page = response.css('a[rel=next]::attr(href)').get()
-        if next_page:
-            next_request = response.urljoin(next_page)
-            yield scrapy.Request(next_request, callback=self.parse_forum_page,
-                                 meta={'forum_url': forum_url})
-
         # threads = response.css('a.topictitle')
         threads = response.css(
             'div.topic_read,div.topic_read_hot,div.topic_read_locked,div.topic_moved,div.sticky_read,'
             'div.sticky_read_locked,div.announce_read,div.announce_read_locked')
         # if len(threads) != len(threads2):
         #     print(response.url)
+        too_old_thread_found = False
         for thread_container in threads:
-
             thread = thread_container.css('a.topictitle')
             topic_loader = ItemLoader(item=TopicItem(), response=response)
             thread_href_selector = thread.css('a::attr(href)')
@@ -92,9 +86,16 @@ class PostSpider(scrapy.Spider):
                 last_post_date_candidates = thread_container.css('span.post-date::text').getall()
                 last_post_date = max(map(lambda x: parse_date(x), last_post_date_candidates))
                 if last_post_date < self.start_date:
+                    too_old_thread_found = True
                     continue
 
             yield scrapy.Request(thread_link + "?sd=d", callback=self.parse_thread)
+
+        next_page = response.css('a[rel=next]::attr(href)').get()
+        if next_page and not too_old_thread_found:
+            next_request = response.urljoin(next_page)
+            yield scrapy.Request(next_request, callback=self.parse_forum_page,
+                                 meta={'forum_url': forum_url})
 
     def parse_thread(self, response):
         """
