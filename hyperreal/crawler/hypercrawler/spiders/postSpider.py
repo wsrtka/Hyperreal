@@ -111,6 +111,8 @@ class PostSpider(scrapy.Spider):
             post_loader = ItemLoader(item=PostItem(), selector=post)
             post_loader.add_value('username', post.css('a.username-coloured::text,a.username::text').get())
             post_date_string = post.css('div.post-date::text')[1].get()[3:-1]
+            if post_date_string is None:
+                continue
             post_date = parse_date(post_date_string)
             post_loader.add_value('date', str(post_date))
             post_loader.add_value('post_id', post.css('div.post-date > a::attr(href)').re(r'.html#(.*)'))
