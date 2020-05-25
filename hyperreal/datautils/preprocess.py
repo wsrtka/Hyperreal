@@ -1,6 +1,6 @@
 import pandas as pd
 
-from hyperreal.textutils.utils import normalize_date
+from hyperreal.textutils.cleaning import normalize_date
 
 
 def data_pre(data, save=False, name="data-clean.csv", date_col="date", content_col="content", fill=" "):
