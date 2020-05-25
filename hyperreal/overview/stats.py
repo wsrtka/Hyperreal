@@ -61,24 +61,20 @@ def show_crawled_forums(df):
 
 
 # TODO: Uogólnić?
-def get_total_posts(posts, forums):
+def get_total_posts(data):
     """
     Get an object to plot the total posts count per forum.
-    :param posts: dataframe containing post data
-    :param forums: dataframe containing forum data
+    :param data: dataframe containing data
     :return: object ready to plot the totals posts count
     """
-    tmp = forums[['id', 'name']]
-    tmp.columns = ['id', 'forum_name']
-    posts = pd.merge(posts, tmp, left_on='forum_id', right_on='id')
+    # tmp = forums[['id', 'name']]
+    # tmp.columns = ['id', 'forum_name']
+    # posts = pd.merge(posts, tmp, left_on='forum_id', right_on='id')
 
-    by_forum = posts.groupby('forum_name').size()
+    by_forum = data.groupby('forum_name').size()
     by_forum = by_forum.reset_index()
     by_forum.columns = ['forum_name', 'count']
     by_forum = by_forum.sort_values(by='count', ascending=False)
-
-    # g = sns.catplot(x="forum_name", y="count", data=by_forum, aspect=5, hue='count', legend=False)
-    # g.set_xticklabels(rotation=90)
 
     return by_forum
 
@@ -96,12 +92,6 @@ def get_forum_popularity(forums, forum_id):
     time.columns = ['date', 'post_count']
 
     forum_name = forums[forums['id'] == forum_id]['name'].values[0]
-
-    # to apply:
-    # sns.set_style("whitegrid")
-    # g = sns.relplot(x='date', y='post_count', hue='post_count', aspect=2, data=X);
-    # g.fig.autofmt_xdate()
-    # g.ax.set_title(forum_name)
 
     return time, forum_name
 
