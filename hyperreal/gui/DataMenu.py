@@ -1,29 +1,35 @@
 import wx
-import glob
 import os
 import shutil
 from typing import List
+import pandas as pd
+import datetime
+
 
 from wx import MenuItem
 
 from hyperreal.crawler.crawler import start_append_crawl, start_full_crawl
 from hyperreal.crawler.datautils import create_data_csv, append_data_csv
+import hyperreal.datautils.preprocess as preprocess
 
-from hyperreal.gui.Dialogues import ErrorDialogue
-
-data_folder = "data"
+from hyperreal.gui.Dialogues import ask, error
 
 
 class DataMenu(wx.Menu):
 
     item_list: List[MenuItem]
-
     def __init__(self, parent):
         super(DataMenu, self).__init__()
+
         self.parent = parent
+
         self.settings = parent.settings
 
         self.crawler_active = False
+
+        load_data = wx.MenuItem(self, -1, "Load/reload data")
+        self.Append(load_data)
+        self.Bind(wx.EVT_MENU, self.load_data, load_data)
 
         dynamic_crawl = wx.MenuItem(self, -1, "Download only new data")
         self.Append(dynamic_crawl)
@@ -41,21 +47,22 @@ class DataMenu(wx.Menu):
         self.Append(filter_data)
         self.Bind(wx.EVT_MENU, self.filter_data, filter_data)
 
-        self.item_list = [dynamic_crawl, full_crawl, invalidate_data, filter_data]
+        self.item_list = [load_data ,dynamic_crawl, full_crawl, invalidate_data, filter_data]
         self.update_availability()
 
     def get_data_availability(self):
-        return not self.crawler_active and os.path.isfile(data_folder + "/data.csv")
+        return not self.crawler_active and os.path.isfile(self.settings.data_folder + "/data.csv")
 
     def update_availability(self):
         self.Enable(self.item_list[0].GetId(), self.get_data_availability())
-        self.Enable(self.item_list[1].GetId(), not self.crawler_active)
+        self.Enable(self.item_list[1].GetId(), self.get_data_availability())
         self.Enable(self.item_list[2].GetId(), not self.crawler_active)
-        self.Enable(self.item_list[3].GetId(), self.get_data_availability())
+        self.Enable(self.item_list[3].GetId(), not self.crawler_active)
+        self.Enable(self.item_list[4].GetId(), self.parent.data_frame is not None)
 
     def crawler_change(self, b):
         self.crawler_active = b
-        self.parent.update_menubar()
+        self.update_availability()
 
     def dynamic_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -64,10 +71,10 @@ class DataMenu(wx.Menu):
         if dialog.ShowModal() == wx.YES:
             self.crawler_change(True)
             try:
-                start_append_crawl(data_folder, self.settings.last_crawl)
-                append_data_csv(data_folder)
-            except Exception as error:
-                ErrorDialogue(self.parent, "Crawler failed: " + str(error))
+                start_append_crawl(self.settings.data_folder, self.settings.last_crawl)
+                append_data_csv(self.settings.data_folder)
+            except Exception as exc:
+                error(self.parent, "Crawler failed: " + str(exc))
             self.crawler_change(False)
 
     def full_crawl(self, _):
@@ -78,17 +85,17 @@ class DataMenu(wx.Menu):
             self.crawler_change(True)
             self.parent.update_menubar()
             try:
-                if not os.path.isdir(data_folder):
-                    os.mkdir(data_folder, mode=0o755)
-            except OSError as error:
-                ErrorDialogue(self.parent, "Failed to create folder for data: " + str(error))
+                if not os.path.isdir(self.settings.data_folder):
+                    os.mkdir(self.settings.data_folder, mode=0o755)
+            except OSError as err:
+                error(self.parent, "Failed to create folder for data: " + str(err))
                 self.crawler_change(False)
                 return
             try:
-                start_full_crawl(data_folder)
-                create_data_csv(data_folder)
-            except Exception as error:
-                ErrorDialogue(self.parent, "Crawler failed: " + str(error))
+                start_full_crawl(self.settings.data_folder)
+                create_data_csv(self.settings.data_folder)
+            except Exception as err:
+                error(self.parent, "Crawler failed: " + str(err))
             self.crawler_change(False)
 
     def invalidate_data(self, _):
@@ -98,12 +105,37 @@ class DataMenu(wx.Menu):
         if dialog.ShowModal() == wx.OK:
             self.crawler_change(True)
             self.parent.update_menubar()
-            shutil.rmtree(data_folder, ignore_errors=True)
-            os.rmdir(data_folder)
+            shutil.rmtree(self.settings.data_folder, ignore_errors=True)
+            os.rmdir(self.settings.data_folder)
             self.crawler_change(False)
 
     def filter_data(self, _):
-        self.crawler_change(True)
-        self.parent.update_menubar()
-        pass
-        self.crawler_change(False)
+        def validate_date(date_text):
+            try:
+                year, month, day = date_text.split("-")
+                datetime.datetime(int(year), int(month), int(day))
+            except ValueError:
+                raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+
+        try:
+            date1 = ask(self.parent, "Enter start date or leave empty")
+            if date1:
+                validate_date(date1)
+            else:
+                date1 = "1980-01-01"
+            date2 = ask(self.parent, "Enter end date or leave empty")
+            if date2:
+                validate_date(date2)
+            else:
+                date2 = "2050-01-01"
+
+            df = self.parent.data_frame
+            self.parent.data_frame = df[(df['date'] > date1) & (df['date'] < date2)]
+        except ValueError as exc:
+            error(self.parent, str(exc))
+
+    def load_data(self, _):
+        if self.get_data_availability():
+            df = pd.read_csv(self.settings.data_folder + "/data.csv")
+            self.parent.data_frame = preprocess.data_pre(df)
+            self.update_availability()

@@ -1,7 +1,8 @@
 import wx
-import json
-from hyperreal.gui.CrawlerMenubar import DataMenu
+import pandas as pd
+from hyperreal.gui.DataMenu import DataMenu
 from hyperreal.gui.Settigns import Settings
+import hyperreal.datautils.preprocess as preprocess
 
 title = "Hyperreal"
 
@@ -10,28 +11,17 @@ class MainWindow(wx.Frame):
     def __init__(self):
         super().__init__(None, title=title)
         self.settings = Settings()
-        self.menus = []
-        #self.text = wx.TextCtrl(self, -1, style=wx.EXPAND | wx.TE_MULTILINE)
-        self.init_ui()
+        self.data_frame = None
 
-    def init_ui(self):
         menubar = wx.MenuBar()
-        crawler_menu = DataMenu(self)
-
-
-
-        self.menus.append(crawler_menu)
-        menubar.Append(crawler_menu, "cra")
-
-        wx.PopupTransientWindow(self, 0)
-
         self.SetMenuBar(menubar)
+        self.menus = []
+
+        self.data_menu = DataMenu(self)
+        self.menus.append(self.data_menu)
+        menubar.Append(self.data_menu, "Data")
 
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
-
-
-
-
 
     def on_right_down(self, e):
         self.PopupMenu(PopupMenu(self), e.GetPosition())

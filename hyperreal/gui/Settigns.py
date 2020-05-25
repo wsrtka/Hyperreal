@@ -6,6 +6,9 @@ settings_file = "settings.json"
 class Settings:
 
     def __init__(self):
+        self.data_folder = "data"
+        self.temp_folder = "temp"
+
         self.last_crawl = "1990-01-01"
 
         try:
