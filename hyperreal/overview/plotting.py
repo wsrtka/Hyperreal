@@ -56,3 +56,14 @@ def plot_drug_correlation(data):
     :return:
     """
     sns.regplot(x=data.columns[0], y=data.columns[1], data=data)
+
+
+def plot_user_drug_interest(data):
+    """
+    Plot the interest of a user in drugs.
+    :param data: dictionary returned by get_user_drug_posts (or forums) function from hyperreal.overview.user
+    :return:
+    """
+    plt.bar(*zip(*data.items()))
+    plt.show()
+#     za https://stackoverflow.com/questions/16010869/plot-a-bar-using-matplotlib-using-a-dictionary
