@@ -1,7 +1,17 @@
 from datetime import date, timedelta
 import regex as re
-from hyperreal.textutils.utils import lemmatize
 from unidecode import unidecode
+
+
+def lemmatize(token, lemma_dict):
+    """
+    Get or create a lemma for the given token.
+    :param token: string containing token to lemmatize
+    :param lemma_dict: current lemma dictionary of type (word: lemma)
+    :return:
+    """
+    lemma = lemma_dict.get(token)
+    return token if lemma is None else lemma
 
 
 def clean(text, use_lemmas=False, is_post=False):

@@ -16,17 +16,6 @@ def tokenize(text):
     return text.split(" ")
 
 
-def lemmatize(token, lemma_dict):
-    """
-    Get or create a lemma for the given token.
-    :param token: string containing token to lemmatize
-    :param lemma_dict: current lemma dictionary of type (word: lemma)
-    :return:
-    """
-    lemma = lemma_dict.get(token)
-    return token if lemma is None else lemma
-
-
 def get_lemma_dict(filename, split_char):
     """
     Get lemma dict from given file.
