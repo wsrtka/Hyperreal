@@ -55,4 +55,4 @@ def plot_drug_correlation(data):
     :param data: dataframe returned by the get_drug_correlation() function in hyperreal.overview.user
     :return:
     """
-    
+    sns.regplot(x=data.columns[0], y=data.columns[1], data=data)
