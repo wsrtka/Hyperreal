@@ -1,4 +1,4 @@
-data_csv_path = ''
+data_csv_path = 'asd3/data.csv'
 import pandas as pd
 import hyperreal.datautils.preprocess as preprocess
 import hyperreal.overview.stats as stats
@@ -11,4 +11,4 @@ print(stats.get_most_active_authors(df))
 
 print(stats.get_total_posts(df))
 
-print(stats.get_forum_popularity(df, 384))
+print(stats.get_forum_popularity(df, 'inne-stymulanty'))

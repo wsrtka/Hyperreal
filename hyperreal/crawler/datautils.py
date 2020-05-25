@@ -85,7 +85,7 @@ def _create_data_line(post, topic, forum):
     data_line[DATA_FORMAT["post_id"]] = post[POSTS_FORMAT["post_id"]]
     data_line[DATA_FORMAT["thread_id"]] = post[POSTS_FORMAT["thread_id"]]
     data_line[DATA_FORMAT["post_number"]] = post[POSTS_FORMAT["post_number"]]
-    data_line[DATA_FORMAT["username"]] = post[POSTS_FORMAT["username"]]
+    data_line[DATA_FORMAT["author"]] = post[POSTS_FORMAT["username"]]
     data_line[DATA_FORMAT["content"]] = post[POSTS_FORMAT["content"]]
     data_line[DATA_FORMAT["date"]] = post[POSTS_FORMAT["date"]]
     data_line[DATA_FORMAT["forum_id"]] = topic["forum_id"]
@@ -97,6 +97,9 @@ def _create_data_line(post, topic, forum):
 def _process_posts(data_file, posts_file, forums_dict, topics_dict):
     csv_writer = csv.writer(data_file)
     csv_post_reader = csv.reader(posts_file)
+
+    # write file header
+    csv_writer.writerow(_create_csv_header(DATA_FORMAT))
 
     for post in csv_post_reader:
         topic = _get_topic(post, topics_dict)
@@ -132,3 +135,12 @@ def _append_posts(posts_file, posts_keys, forums_dict, topics_dict, data_file):
             continue
 
         csv_writer.writerow(_create_data_line(post, topic, forum))
+
+
+def _create_csv_header(element_format):
+    header = [None] * (len(element_format))
+
+    for key in element_format.keys():
+        header[element_format[key]] = key
+
+    return header
