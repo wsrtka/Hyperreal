@@ -10,7 +10,7 @@ def plot_post_per_year(data, date_column="date"):
     :return:
     """
     by_year = data[date_column].groupby([data.date.dt.year]).agg('count')
-    by_year.plot('bar')
+    by_year.plot(kind='bar')
 
 
 def plot_author_activity(data, author_column="author", post_id_column="post_id", ascending=False, top=10):
@@ -32,7 +32,7 @@ def plot_total_post_count_per_forum(to_plot):
     :param to_plot: object prepared by the get_total_posts() function in hyperreal.overview.stats
     :return:
     """
-    g = sns.catplot(x="forum_name", y="count", data=to_plot, aspect=5, hue='count', legend=False)
+    g = sns.catplot(x="name", y="count", data=to_plot, aspect=5, hue='count', legend=False)
     g.set_xticklabels(rotation=90)
 
 
@@ -44,7 +44,7 @@ def plot_forum_popularity(timeframe, forum_name):
     :return:
     """
     sns.set_style("whitegrid")
-    g = sns.relplot(x='date', y='post_count', hue='post_count', aspect=2, data=timeframe)
+    g = sns.relplot(x='date', y='post_count', hue='post_count', data=timeframe, aspect=2)
     g.fig.autofmt_xdate()
     g.ax.set_title(forum_name)
 
