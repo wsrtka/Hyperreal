@@ -1,4 +1,4 @@
-import WordCloud as WordCloud
+import wordcloud as WordCloud
 import numpy as np
 from termcolor import colored
 import pandas as pd

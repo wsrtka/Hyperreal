@@ -1,4 +1,4 @@
-from _collections import namedtuple
+from collections import namedtuple
 import re
 from gensim import utils
 import nlp as nlp
