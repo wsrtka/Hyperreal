@@ -36,7 +36,7 @@ DATA_FORMAT = {
     "post_id": 0,
     "thread_id": 1,
     "post_number": 2,
-    "username": 3,
+    "author": 3,
     "content": 4,
     "date": 5,
     "forum_id": 6,

@@ -1,5 +1,5 @@
-data_csv_path = 'data.csv'
 
+data_csv_path = 'data.csv'
 
 import pandas as pd
 import hyperreal.datautils.preprocess as preprocess
@@ -31,3 +31,4 @@ print(plot.plot_forum_popularity(res4, name))
 
 
 
+print(stats.get_forum_popularity(df, 'inne-stymulanty'))

@@ -61,7 +61,7 @@ def show_crawled_forums(df):
 
 
 # TODO: Uogólnić?
-def get_total_posts(df, forum_name_col="name"):
+def get_total_posts(df, forum_name_col="forum_id"):
     """
     Get an object to plot the total posts count per forum.
     :param forum_name_col: string name of column containing forum name
@@ -92,7 +92,7 @@ def get_forum_popularity(forums, forum_id):
     time = time.reset_index()
     time.columns = ['date', 'post_count']
 
-    forum_name = forums[forums['forum_id'] == forum_id]['name'].values[0]
+    forum_name = forums[forums['forum_id'] == forum_id]['forum_id'].values[0]
 
     return time, forum_name
 
