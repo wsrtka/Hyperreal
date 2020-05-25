@@ -92,7 +92,7 @@ def get_forum_popularity(forums, forum_id):
     time = time.reset_index()
     time.columns = ['date', 'post_count']
 
-    forum_name = forums[forums['id'] == forum_id]['name'].values[0]
+    forum_name = forums[forums['forum_id'] == forum_id]['name'].values[0]
 
     return time, forum_name
 
