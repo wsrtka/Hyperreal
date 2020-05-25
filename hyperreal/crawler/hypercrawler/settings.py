@@ -13,8 +13,8 @@ import logging
 
 BOT_NAME = 'hyperreal'
 
-SPIDER_MODULES = ['hyperreal.spiders']
-NEWSPIDER_MODULE = 'hyperreal.spiders'
+SPIDER_MODULES = ['hyperreal.crawler.hypercrawler.spiders']
+NEWSPIDER_MODULE = 'hyperreal.crawler.hypercrawler.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'hyperreal (+http://www.yourdomain.com)'
@@ -48,13 +48,13 @@ CONCURRENT_REQUESTS = 32
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'hyperreal.middlewares.HyperrealSpiderMiddleware': 543,
+#    'hyperreal.crawler.hypercrawler.middlewares.HyperrealSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    'hyperreal.middlewares.HyperrealDownloaderMiddleware': 543,
+#    'hyperreal.crawler.hypercrawler.middlewares.HyperrealDownloaderMiddleware': 543,
 # }
 
 # Enable or disable extensions
@@ -66,7 +66,7 @@ CONCURRENT_REQUESTS = 32
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'hyperreal.pipelines.HyperrealPipeline': 300,
+    'hyperreal.crawler.hypercrawler.pipelines.HyperrealPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

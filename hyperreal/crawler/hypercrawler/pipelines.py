@@ -1,19 +1,39 @@
-from hyperreal.items import *
+from hyperreal.crawler.hypercrawler.items import *
 import csv
 import re
 import w3lib.html
+import os
+from hyperreal.crawler.constants import *
 
 
 class HyperrealPipeline:
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        return cls(settings.get('OUTPUT_DIRECTORY'), settings.get('START_DATE'))
+
+    def __init__(self, output_directory, start_date):
+        self.output_directory = output_directory
+        self.start_date = start_date
 
     def open_spider(self, start_requests):
         """
         Called during spider startup. Opens and truncates output files and prepares csv writers.
         :param start_requests: Starting requests for the spider
         """
-        self.forum_file = open('forums.csv', 'w', newline='', encoding='utf-8')
-        self.topic_file = open('topics.csv', 'w', newline='', encoding='utf-8')
-        self.post_file = open('posts.csv', 'w', newline='', encoding='utf-8')
+
+        def open_output_file(file_name):
+            return open(os.path.join(self.output_directory, file_name), 'w', newline='', encoding='utf-8')
+
+        if self.start_date is None:
+            self.forum_file = open_output_file(FORUMS_FILE_NAME)
+            self.topic_file = open_output_file(TOPICS_FILE_NAME)
+            self.post_file = open_output_file(POSTS_FILE_NAME)
+        else:
+            self.forum_file = open_output_file(FORUMS_TO_APPEND_FILE_NAME)
+            self.topic_file = open_output_file(TOPICS_TO_APPEND_FILE_NAME)
+            self.post_file = open_output_file(POSTS_TO_APPEND_FILE_NAME)
 
         self.forum_writer = csv.writer(self.forum_file)
         self.topic_writer = csv.writer(self.topic_file)
@@ -31,8 +51,8 @@ class HyperrealPipeline:
     def process_item(self, item, spider):
         """
         Processes scraped item and saves it in a output file accordingly
-        :param item: Item to process. Might be a :class:`hyperreal.items.PostItem`,
-        :class:`hyperreal.items.ForumItem` or :class:`hyperreal.items.TopicItem`
+        :param item: Item to process. Might be a :class:`hyperreal.crawler.hypercrawler.items.PostItem`,
+        :class:`hyperreal.crawler.hypercrawler.items.ForumItem` or :class:`hypercrawler.items.TopicItem`
         :param spider: a spider
         """
         if isinstance(item, ForumItem):
@@ -48,7 +68,11 @@ class HyperrealPipeline:
         Process ForumItem and save it to the output file
         :param item: ForumItem to process
         """
-        self.forum_writer.writerow([item['link'][0], item['name'][0]])
+        link = item['link'][0]
+
+        forum_id_match = re.compile(r'.*/talk/(.*)\.html$').match(link)
+        if forum_id_match is not None:
+            self.forum_writer.writerow([link, item['name'][0], forum_id_match.group(1)])
         return item
 
     def handle_topic(self, item):
@@ -56,7 +80,10 @@ class HyperrealPipeline:
         Process TopicItem and save it to the output file
         :param item: TopicItem to process
         """
-        self.topic_writer.writerow([item['id'][0], item['link'][0], item['name'][0]])
+        forum_id_match = re.compile(r'.*/talk/(.*)\.html$').match(item['forum_link'][0])
+        if forum_id_match is not None:
+            self.topic_writer.writerow(
+                [item['id'][0], forum_id_match.group(1), item['thread_link'][0], item['name'][0]])
         return item
 
     def handle_post(self, item):
