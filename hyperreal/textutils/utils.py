@@ -6,6 +6,7 @@ from termcolor import colored
 from textsearch import TextSearch
 from hyperreal.textutils.cleaning import clean
 
+
 def tokenize(text):
     """
     Split text into tokens.
@@ -13,6 +14,7 @@ def tokenize(text):
     :return: list of strings created by splitting text by empty spaces
     """
     return text.split(" ")
+
 
 def lemmatize(token, lemma_dict):
     """
