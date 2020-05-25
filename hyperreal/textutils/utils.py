@@ -68,7 +68,6 @@ def get_narkopedia_map(narkopedia):
         other = list(
             set(
                 names(row["other-forms"])
-                + names(row["generic-names"])
                 + names(row["other-names"])
             )
         )
