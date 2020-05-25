@@ -32,7 +32,7 @@ def plot_total_post_count_per_forum(to_plot):
     :param to_plot: object prepared by the get_total_posts() function in hyperreal.overview.stats
     :return:
     """
-    g = sns.catplot(x="name", y="count", data=to_plot, aspect=5, hue='count', legend=False)
+    g = sns.catplot(x="forum_name", y="count", data=to_plot, aspect=5, hue='count', legend=False)
     g.set_xticklabels(rotation=90)
 
 
