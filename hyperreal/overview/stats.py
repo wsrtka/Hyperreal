@@ -61,20 +61,20 @@ def show_crawled_forums(df):
 
 
 # TODO: Uogólnić?
-def get_total_posts(data, forum_name_col="name"):
+def get_total_posts(df, forum_name_col="name"):
     """
     Get an object to plot the total posts count per forum.
     :param forum_name_col: string name of column containing forum name
-    :param data: dataframe containing data
+    :param df: dataframe containing data
     :return: object ready to plot the totals posts count
     """
     # tmp = forums[['id', 'name']]
     # tmp.columns = ['id', 'forum_name']
     # posts = pd.merge(posts, tmp, left_on='forum_id', right_on='id')
 
-    by_forum = data.groupby(forum_name_col).size()
+    by_forum = df.groupby(forum_name_col).size()
     by_forum = by_forum.reset_index()
-    by_forum.columns = ['forum_name', 'count']
+    by_forum.columns = ['name', 'count']
     by_forum = by_forum.sort_values(by='count', ascending=False)
 
     return by_forum
