@@ -74,7 +74,7 @@ def get_total_posts(df, forum_name_col="name"):
 
     by_forum = df.groupby(forum_name_col).size()
     by_forum = by_forum.reset_index()
-    by_forum.columns = ['name', 'count']
+    by_forum.columns = [forum_name_col, 'count']
     by_forum = by_forum.sort_values(by='count', ascending=False)
 
     return by_forum
