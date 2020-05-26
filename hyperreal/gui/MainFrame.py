@@ -1,11 +1,14 @@
+import os
+from shutil import copyfile
+from typing import Tuple
+
 import wx
-import pandas as pd
+
 from hyperreal.gui.DataMenu import DataMenu
+from hyperreal.gui.Dialogues import error, ask
+from hyperreal.gui.Panels import ImagePanel, TextPanel
 from hyperreal.gui.PlotMenus import ForumMenu
 from hyperreal.gui.Settigns import Settings
-import hyperreal.datautils.preprocess as preprocess
-from hyperreal.gui.Panels import ImagePanel, TextPanel
-from typing import Tuple
 
 title = "Hyperreal"
 
@@ -15,6 +18,7 @@ class MainFrame(wx.Frame):
         super().__init__(None, title=title)
         self.settings = Settings()
         self.data_frame = None
+        self.data_frame_cache = None
 
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
@@ -89,9 +93,9 @@ class PopupMenu(wx.Menu):
         self.Append(switch_control)
         self.Bind(wx.EVT_MENU, self.switch, switch_control)
 
-        save_to_file = wx.MenuItem(self, -1, "Safe")
+        save_to_file = wx.MenuItem(self, -1, "Save")
         self.Append(save_to_file)
-        self.Bind(wx.EVT_MENU, lambda e: print("safe"), save_to_file)
+        self.Bind(wx.EVT_MENU, self.save_to_file, save_to_file)
 
     def switch(self, _):
         if self.parent.image_on_top:
@@ -99,11 +103,24 @@ class PopupMenu(wx.Menu):
         else:
             self.parent.display_image()
 
+    def save_to_file(self, _):
+        dlg = wx.DirDialog(self.parent, "Choose save directory", style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+        if not dlg.ShowModal() == wx.ID_OK:
+            error(message="Chosen file must be a directory")
+            return
+        path = dlg.GetPath()
+        dlg.Destroy()
+        name = ask(message="How should I name this file?")
+        if not name:
+            error(message="Empty file name is not a valid name")
+        if self.parent.image_on_top:
+            copyfile(self.parent.settings.temp_folder + "/plot.png", path + "/%s.png" % name)
+        else:
+            self.parent.data_frame_cache.to_csv(path + "/%s.csv" % name)
+
 
 if __name__ == '__main__':
     app = wx.App()
     window = MainFrame()
-    # window.display(("image_test.png", "a" * 1000))
-
     window.Show()
     app.MainLoop()

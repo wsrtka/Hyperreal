@@ -101,8 +101,10 @@ class DataMenu(wx.Menu):
             self.crawler_change(False)
 
     def onCrawlerDone(self, event):
-        print('aborted: ' + str(event.aborted))
-        self.parent.display_text("aaaaaaaaaaaaaaaaaaaaaa")
+        if event.aborted:
+            error(message="Crawler aborted", caption="Warning")
+        else:
+            notify(message="Crawler finished")
         self.settings.last_crawl = date.today()
         self.settings.save()
 
