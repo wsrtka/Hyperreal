@@ -11,7 +11,7 @@ class Settings:
     def __init__(self):
         self.data_folder = "data"
         self.temp_folder = "temp"
-        self.narcopedia_file = ''
+        self.narcopedia_file = "narkopedia.json"
         self.model_file = ''
 
         self._ensure_dir_exists(self.data_folder)

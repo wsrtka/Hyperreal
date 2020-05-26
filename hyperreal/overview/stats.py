@@ -134,3 +134,38 @@ def show_word_cloud(drug, raw_docs, narkopedia_map, doc_freq, filter_numeric=Tru
 
     plt.tight_layout()
     plt.show()
+
+def generate_word_cloud(drug, raw_docs, narkopedia_map, doc_freq, filter_numeric=True, length=1, top=100):
+    """
+    Shows word cloud of ngrams associated with given drug.
+    :param drug: string containing drug name
+    :param raw_docs: list of strings containing texts for analysis
+    :param narkopedia_map: dictionary of drug names and their alternative forms
+    :param doc_freq: dictionary containing ngrams and number of docs in which they appeared
+    :param filter_numeric: boolean, True if drug ngrams should not contain numbers
+    :param length: int length of ngrams to create
+    :param top: int number of top ngrams to use
+    :return: print word cloud of ngrams associated with drug
+    """
+    fig, axes = plt.subplots(3, 2, figsize=(25, 18))
+
+    for i, metric in enumerate(["tf", "tfidf"]):
+        for j, n in enumerate([1, 2, 3]):
+            top_ngrams = ngrams_describing_drug(
+                narkopedia_map[drug],
+                raw_docs,
+                doc_freq[n],
+                filter_numeric=filter_numeric,
+                length=length,
+                top=top,
+                metric=metric
+            )
+
+            text_scores = {" ".join(k): v for k, v in top_ngrams}
+
+            wc = WordCloud(height=400, width=800)
+            wc.generate_from_frequencies(text_scores)
+
+            axes[j, i].imshow(wc)
+
+    plt.tight_layout()

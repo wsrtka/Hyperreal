@@ -7,7 +7,7 @@ import wx
 from hyperreal.gui.DataMenu import DataMenu
 from hyperreal.gui.Dialogues import error, ask
 from hyperreal.gui.Panels import ImagePanel, TextPanel
-from hyperreal.gui.PlotMenus import ForumMenu
+from hyperreal.gui.PlotMenus import ForumMenu, NGramsMenu
 from hyperreal.gui.Settigns import Settings
 
 title = "Hyperreal"
@@ -19,6 +19,7 @@ class MainFrame(wx.Frame):
         self.settings = Settings()
         self.data_frame = None
         self.data_frame_cache = None
+        self.raw_save = None
 
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
@@ -29,9 +30,14 @@ class MainFrame(wx.Frame):
         forum_menu = ForumMenu(self)
         menubar.Append(forum_menu, "Forum")
 
-        self.data_dependent_menu = [forum_menu]
+        ngram_menu = NGramsMenu(self)
+        menubar.Append(ngram_menu, "Naming conventions")
 
-        self.update_menubar()
+        self.data_dependent_menu = [forum_menu]
+        if self.settings.narcopedia_file:
+            self.data_dependent_menu.append(ngram_menu)
+
+        #self.update_menubar()
 
         self.image_panel = ImagePanel(self)
         self.text_panel = TextPanel(self)
@@ -120,7 +126,11 @@ class PopupMenu(wx.Menu):
         if self.parent.image_on_top:
             copyfile(self.parent.settings.temp_folder + "/plot.png", path + "/%s.png" % name)
         else:
-            self.parent.data_frame_cache.to_csv(path + "/%s.csv" % name)
+            if self.parent.data_frame_cache:
+                self.parent.data_frame_cache.to_csv(path + "/%s.csv" % name)
+            else:
+                with open(path + "/%s.txt" % name, "wb") as text_file:
+                    text_file.write(self.parent.raw_save.encode('UTF8'))
 
 
 if __name__ == '__main__':

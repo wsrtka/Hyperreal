@@ -1,5 +1,6 @@
 import wx
 from hyperreal.gui.Dialogues import error
+from wx.lib import wordwrap
 
 
 class ImagePanel(wx.Panel):
@@ -34,15 +35,10 @@ class TextPanel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)
+
         self.text = wx.StaticText(self, label="elo")
-
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.mainSizer.Add(self.text, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
-
         self.text.Bind(wx.EVT_RIGHT_DOWN, parent.on_right_down)
 
     def load_text(self, text: str):
         self.text.SetLabel(label=text)
+        self.text.Wrap(1000)
