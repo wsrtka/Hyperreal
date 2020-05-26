@@ -5,6 +5,10 @@ from hyperreal.crawler.crawler_error import *
 
 
 def create_data_csv(folder):
+    """
+    Create data.csv file from scrapped data and saves result in the given folder
+    :param folder: folder with scrapped data: forums.csv, topics.csv, posts.csv
+    """
     try:
         posts_file = open(os.path.join(folder, POSTS_FILE_NAME), 'r', encoding="utf-8")
         data_file = open(os.path.join(folder, DATA_FILE_NAME), 'w', encoding="utf-8", newline='')
@@ -18,6 +22,10 @@ def create_data_csv(folder):
 
 
 def append_data_csv(folder):
+    """
+    Append newly scrapped data into existing data csv file
+    :param folder: folder with scrapped and processed data: data.csv, forums.csv, forums_append.csv, topics.csv, topics_append.csv, posts.csv, posts_append.csv
+    """
     try:
         data_file = open(os.path.join(folder, DATA_FILE_NAME), 'r', encoding="utf-8")
         forums_dict = _load_element_dict(folder, FORUMS_FILE_NAME, FORUMS_FORMAT)
