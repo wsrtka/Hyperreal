@@ -7,7 +7,7 @@ import wx
 from hyperreal.gui.DataMenu import DataMenu
 from hyperreal.gui.Dialogues import error, ask
 from hyperreal.gui.Panels import ImagePanel, TextPanel
-from hyperreal.gui.PlotMenus import ForumMenu, NGramsMenu
+from hyperreal.gui.PlotMenus import ForumMenu, NGramsMenu, NLPMenu
 from hyperreal.gui.Settigns import Settings
 
 title = "Hyperreal"
@@ -33,11 +33,18 @@ class MainFrame(wx.Frame):
         ngram_menu = NGramsMenu(self)
         menubar.Append(ngram_menu, "Naming conventions")
 
+        nlp_menu = NLPMenu(self)
+        menubar.Append(nlp_menu, "NLP analytics")
+
         self.data_dependent_menu = [forum_menu]
+
         if self.settings.narcopedia_file:
             self.data_dependent_menu.append(ngram_menu)
 
-        #self.update_menubar()
+        if self.settings.model_file:
+            self.data_dependent_menu.append(nlp_menu)
+
+        self.update_menubar()
 
         self.image_panel = ImagePanel(self)
         self.text_panel = TextPanel(self)

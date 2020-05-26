@@ -8,7 +8,8 @@ from hyperreal.datautils.utils import get_narkopedia
 from hyperreal.gui.Dialogues import ask, notify
 from hyperreal.gui.Settigns import Settings
 from hyperreal.textutils.ngrams import ngram_dict
-from hyperreal.textutils.utils import get_narkopedia_map
+from hyperreal.textutils.utils import get_narkopedia_map, get_sentences
+from hyperreal.textutils.word2vec import load_model_from_file, finetuned_model, find_new_drug_names, find_symptoms
 
 
 class ForumMenu(wx.Menu):
@@ -105,21 +106,75 @@ class NGramsMenu(wx.Menu):
         content_df = self.parent.data_frame['content']
         return ngram_dict(content_df)
 
+    def only_chars(self, res):
+        self.parent.raw_save = str(res)
+        self.parent.display((None, self.parent.raw_save))
+
     def narco_names(self, _):
         self.parent.data_frame_cache = None
-        self.parent.raw_save = str(self.narkopedia_map.keys())
-        self.parent.display((None, self.parent.raw_save))
+        self.only_chars(self.narkopedia_map.keys())
 
     def drug_aliases(self, _):
         drug = ask(message="What drug do you want to know about?", default_value="marihuana")
         self.parent.data_frame_cache = None
-        self.parent.raw_save = str(self.narkopedia_map[drug])
-        self.parent.display((None, self.parent.raw_save))
+        self.only_chars(self.narkopedia_map[drug])
 
     def drug_ngram(self, _):
-        notify(message="This operation is very computationally intensive. Are you sure your computer can handle it?",
-               header="Proceed?")
+        dialog = wx.MessageDialog(self.parent,
+                                  "This operation is very computationally intensive. "
+                                  "Are you sure your computer can handle it?",
+                                  "Proceed?", wx.YES_NO | wx.ICON_QUESTION)
+        if dialog.ShowModal() == wx.ID_YES:
+            drug = ask(message="What drug do you want to know about?", default_value="marihuana")
+            plt.clf()
+            ngrams_total, ngrams_docfreq = self.create_dict()
+            stats.generate_word_cloud(drug, self.parent.data.frame['content'], self.narkopedia_map, ngrams_docfreq,
+                                      length=2)
+            plt.savefig(self.settings.temp_folder + "/plot.png")
+            self.parent.display((self.settings.temp_folder + "/plot.png", None))
+
+
+class NLPMenu(wx.Menu):
+    settings: Settings
+
+    def __init__(self, parent):
+        super(NLPMenu, self).__init__()
+        self.parent = parent
+        self.settings = parent.settings
+
+        if self.settings.model_file:
+            self.model = load_model_from_file(self.settings.model_file)
+            self.model_after = None
+
+        new_drug_names = wx.MenuItem(self, -1, "New drug names")
+        self.Append(new_drug_names)
+        self.Bind(wx.EVT_MENU, self.new_drug_names, new_drug_names)
+
+        symptoms = wx.MenuItem(self, -1, "Drug symptoms")
+        self.Append(symptoms)
+        self.Bind(wx.EVT_MENU, self.symptoms, symptoms)
+
+        if not self.settings.model_file:
+            new_drug_names.Enable(False)
+            symptoms.Enable(False)
+
+    def get_model(self):
+        if not self.model_after:
+            sentences = get_sentences(self.parent.data_frame)
+            self.model_after = finetuned_model(self.model, sentences, 'fasttext_file', 'drug_w2v', './finetuned_model')
+        return self.model_after
+
+    def only_chars(self, res):
+        self.parent.raw_save = str(res)
+        self.parent.display((None, self.parent.raw_save))
+
+    def new_drug_names(self, e):
         drug = ask(message="What drug do you want to know about?", default_value="marihuana")
-        ngrams_total, ngrams_docfreq = self.create_dict()
-        stats.generate_word_cloud(drug, self.parent.data.frame['content'], self.narkopedia_map, ngrams_docfreq,
-                                  length=2)
+        res = find_new_drug_names(drug, self.get_model())
+        self.only_chars(res[10:])  # Czy to ma sens?!?!?!?
+
+    def symptoms(self, e):
+        symptoms = ask(message="What symptom are you looking for?", default_value="wymioty")
+        synonyms = []
+        res = find_symptoms(symptoms, self.get_model(), synonyms)
+        self.only_chars(res)
