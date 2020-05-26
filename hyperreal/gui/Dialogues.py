@@ -15,3 +15,7 @@ def ask(parent=None, message='', default_value='') -> str:
     return result
 
 
+def notify(parent=None, message='', header="Notice"):
+    notice = wx.MessageDialog(parent, message, caption=header)
+    notice.ShowModal()
+    notice.Destroy()

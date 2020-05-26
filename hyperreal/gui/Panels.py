@@ -7,7 +7,7 @@ class ImagePanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)
         image = wx.Image(240, 240)
-        self.photo_max_size = 512
+        self.photo_max_size = 900
         self.image_control = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap(image))
 
         self.image_control.Bind(wx.EVT_RIGHT_DOWN, parent.on_right_down)
@@ -15,15 +15,15 @@ class ImagePanel(wx.Panel):
     def load_image(self, filename):
         try:
             image = wx.Image(filename, wx.BITMAP_TYPE_ANY)
-            W = image.GetWidth()
-            H = image.GetHeight()
-            if W > H:
-                NewW = self.photo_max_size
-                NewH = self.photo_max_size * H / W
-            else:
-                NewH = self.photo_max_size
-                NewW = self.photo_max_size * W / H
-            image = image.Scale(NewW, NewH)
+            # W = image.GetWidth()
+            # H = image.GetHeight()
+            # if W > H:
+            #     NewW = self.photo_max_size
+            #     NewH = self.photo_max_size * H / W
+            # else:
+            #     NewH = self.photo_max_size
+            #     NewW = self.photo_max_size * W / H
+            # image = image.Scale(NewW, NewH)
             self.image_control.SetBitmap(wx.Bitmap(image))
             self.Refresh()
         except IOError:

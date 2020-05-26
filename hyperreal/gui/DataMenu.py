@@ -12,7 +12,7 @@ from hyperreal.crawler.crawler import start_append_crawl, start_full_crawl
 from hyperreal.crawler.datautils import create_data_csv, append_data_csv
 import hyperreal.datautils.preprocess as preprocess
 
-from hyperreal.gui.Dialogues import ask, error
+from hyperreal.gui.Dialogues import ask, error, notify
 
 
 class DataMenu(wx.Menu):
@@ -83,7 +83,6 @@ class DataMenu(wx.Menu):
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
         if dialog.ShowModal() == wx.YES:
             self.crawler_change(True)
-            self.parent.update_menubar()
             try:
                 if not os.path.isdir(self.settings.data_folder):
                     os.mkdir(self.settings.data_folder, mode=0o755)
@@ -104,7 +103,6 @@ class DataMenu(wx.Menu):
                                   "Delete data warning", wx.OK | wx.CANCEL | wx.ICON_WARNING)
         if dialog.ShowModal() == wx.OK:
             self.crawler_change(True)
-            self.parent.update_menubar()
             shutil.rmtree(self.settings.data_folder, ignore_errors=True)
             os.rmdir(self.settings.data_folder)
             self.crawler_change(False)
@@ -139,3 +137,5 @@ class DataMenu(wx.Menu):
             df = pd.read_csv(self.settings.data_folder + "/data.csv")
             self.parent.data_frame = preprocess.data_pre(df)
             self.update_availability()
+            self.parent.update_menubar()
+            notify(message="Finished loading data")
