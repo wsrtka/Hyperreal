@@ -5,7 +5,6 @@ from typing import List
 import pandas as pd
 import datetime
 
-
 from wx import MenuItem
 
 from hyperreal.crawler.crawler import start_append_crawl, start_full_crawl
@@ -47,7 +46,7 @@ class DataMenu(wx.Menu):
         self.Append(filter_data)
         self.Bind(wx.EVT_MENU, self.filter_data, filter_data)
 
-        self.item_list = [load_data ,dynamic_crawl, full_crawl, invalidate_data, filter_data]
+        self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data]
         self.update_availability()
 
     def get_data_availability(self):
@@ -79,18 +78,14 @@ class DataMenu(wx.Menu):
 
     def full_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
-                                  "Are you sure you want to start full crawl? It might even take over 4 hours.",
+                                  "Are you sure you want to start full crawl? It might a few hours.",
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
-        if dialog.ShowModal() == wx.YES:
+        res = dialog.ShowModal()
+        print()
+        if res == wx.ID_YES:
             self.crawler_change(True)
             self.parent.update_menubar()
-            try:
-                if not os.path.isdir(self.settings.data_folder):
-                    os.mkdir(self.settings.data_folder, mode=0o755)
-            except OSError as err:
-                error(self.parent, "Failed to create folder for data: " + str(err))
-                self.crawler_change(False)
-                return
+
             try:
                 start_full_crawl(self.settings.data_folder)
                 create_data_csv(self.settings.data_folder)
