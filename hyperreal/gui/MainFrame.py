@@ -31,10 +31,10 @@ class MainFrame(wx.Frame):
         menubar.Append(forum_menu, "Forum")
 
         ngram_menu = NGramsMenu(self)
-        menubar.Append(ngram_menu, "Naming conventions")
+        menubar.Append(ngram_menu, "Narkopedia")
 
         nlp_menu = NLPMenu(self)
-        menubar.Append(nlp_menu, "NLP analytics")
+        menubar.Append(nlp_menu, "NLP")
 
         self.data_dependent_menu = [forum_menu]
 

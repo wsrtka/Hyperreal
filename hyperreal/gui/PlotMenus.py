@@ -64,7 +64,7 @@ class ForumMenu(wx.Menu):
     def forum_popularity(self, _):
         plt.clf()
         df = self.parent.data_frame.copy()
-        forum_name = ask(message="What is the name of the forum you are interested in?")
+        forum_name = ask(message="What is the name of the forum you are interested in?", default_value="inne-stymulanty")
         if forum_name:
             data, name = (stats.get_forum_popularity(df, forum_name))
             self.parent.data_frame_cache = data
