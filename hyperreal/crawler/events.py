@@ -7,10 +7,9 @@ def EVT_RESULT(win, func):
     win.Connect(-1, -1, EVT_RESULT_ID, func)
 
 
-class CrawlerProgressEvent(wx.PyEvent):
+class CrawlerDoneEvent(wx.PyEvent):
 
-    def __init__(self, scrapped, done):
+    def __init__(self, aborted):
         super().__init__()
         self.SetEventType(EVT_RESULT_ID)
-        self.scrapped = scrapped
-        self.done = done
+        self.aborted = aborted

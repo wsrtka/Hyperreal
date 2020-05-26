@@ -3,10 +3,11 @@ import os
 import shutil
 from typing import List
 import pandas as pd
-import datetime
+from datetime import date, datetime
 
 from wx import MenuItem
 
+from hyperreal.crawler.events import EVT_RESULT
 from hyperreal.crawler.crawler import start_append_crawl, start_full_crawl
 from hyperreal.crawler.datautils import create_data_csv, append_data_csv
 import hyperreal.datautils.preprocess as preprocess
@@ -49,6 +50,9 @@ class DataMenu(wx.Menu):
         self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data]
         self.update_availability()
 
+        self.crawler_thread = None
+        self.crawler_already_run = False
+
     def get_data_availability(self):
         return not self.crawler_active and os.path.isfile(self.settings.data_folder + "/data.csv")
 
@@ -67,30 +71,47 @@ class DataMenu(wx.Menu):
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start dynamic crawl? It might take a while.",
                                   "Start dynamic crawl", wx.YES_NO | wx.ICON_QUESTION)
-        if dialog.ShowModal() == wx.YES:
+        if self.crawler_already_run:
+            error(self.parent, "Please, restart the app.")
+        if dialog.ShowModal() == wx.ID_YES:
             self.crawler_change(True)
-            try:
-                start_append_crawl(self.settings.data_folder, self.settings.last_crawl)
-                append_data_csv(self.settings.data_folder)
-            except Exception as exc:
-                error(self.parent, "Crawler failed: " + str(exc))
+            self.crawler_already_run = True
+            EVT_RESULT(self, self.onCrawlerDone)
+            self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
+            self.crawler_thread.start()
+            # try:
+            #     start_append_crawl(self.settings.data_folder, self.settings.last_crawl)
+            #     append_data_csv(self.settings.data_folder)
+            # except Exception as exc:
+            #     error(self.parent, "Crawler failed: " + str(exc))
             self.crawler_change(False)
 
     def full_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start full crawl? It might a few hours.",
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
-        res = dialog.ShowModal()
-        print()
-        if res == wx.ID_YES:
+        if self.crawler_already_run:
+            error(self.parent, "Please, restart the app.")
+        if dialog.ShowModal() == wx.ID_YES:
+            self.crawler_already_run = True
             self.crawler_change(True)
 
-            try:
-                start_full_crawl(self.settings.data_folder)
-                create_data_csv(self.settings.data_folder)
-            except Exception as err:
-                error(self.parent, "Crawler failed: " + str(err))
+            EVT_RESULT(self, self.onCrawlerDone)
+            # self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
+            self.crawler_thread = start_full_crawl(self.settings.data_folder, self)
+            self.crawler_thread.start()
+            # try:
+            #     start_full_crawl(self.settings.data_folder)
+            #     create_data_csv(self.settings.data_folder)
+            # except Exception as err:
+            #     error(self.parent, "Crawler failed: " + str(err))
             self.crawler_change(False)
+
+    def onCrawlerDone(self, event):
+        print('aborted: ' + str(event.aborted))
+        self.parent.display_text("aaaaaaaaaaaaaaaaaaaaaa")
+        self.settings.last_crawl = date.today()
+        self.settings.save()
 
     def invalidate_data(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -106,7 +127,7 @@ class DataMenu(wx.Menu):
         def validate_date(date_text):
             try:
                 year, month, day = date_text.split("-")
-                datetime.datetime(int(year), int(month), int(day))
+                datetime(int(year), int(month), int(day))
             except ValueError:
                 raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 

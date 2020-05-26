@@ -15,13 +15,13 @@ class Settings:
         self._ensure_dir_exists(self.data_folder)
         self._ensure_dir_exists(self.temp_folder)
 
-        self.last_crawl = date(1990, 1, 1)
-        try:
-            with open(settings_file, "r") as f:
-                loaded = json.load(f)
-                self.last_crawl = date.fromisoformat(loaded["last_crawl"])
-        except FileNotFoundError as e:
-            print(e)
+        self.last_crawl = date(2020, 5, 26)
+        # try:
+        #     with open(settings_file, "r") as f:
+        #         loaded = json.load(f)
+        #         self.last_crawl = date.fromisoformat(loaded["last_crawl"])
+        # except FileNotFoundError as e:
+        #     print(e)
 
     def save(self):
         new_json = {"last_crawl": self.last_crawl}

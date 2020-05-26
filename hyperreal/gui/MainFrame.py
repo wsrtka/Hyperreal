@@ -100,9 +100,10 @@ class PopupMenu(wx.Menu):
             self.parent.display_image()
 
 
-app = wx.App()
-window = MainFrame()
-window.display(("image_test.png", "a" * 1000))
+if __name__ == '__main__':
+    app = wx.App()
+    window = MainFrame()
+    # window.display(("image_test.png", "a" * 1000))
 
-window.Show()
-app.MainLoop()
+    window.Show()
+    app.MainLoop()
