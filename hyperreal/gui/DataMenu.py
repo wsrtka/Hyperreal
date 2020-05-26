@@ -51,7 +51,6 @@ class DataMenu(wx.Menu):
         self.update_availability()
 
         self.crawler_thread = None
-        self.crawler_already_run = False
 
     def get_data_availability(self):
         return not self.crawler_active and os.path.isfile(self.settings.data_folder + "/data.csv")
@@ -71,11 +70,8 @@ class DataMenu(wx.Menu):
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start dynamic crawl? It might take a while.",
                                   "Start dynamic crawl", wx.YES_NO | wx.ICON_QUESTION)
-        if self.crawler_already_run:
-            error(self.parent, "Please, restart the app.")
         if dialog.ShowModal() == wx.ID_YES:
             self.crawler_change(True)
-            self.crawler_already_run = True
             EVT_RESULT(self, self.onCrawlerDone)
             self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
             self.crawler_thread.start()
@@ -90,10 +86,7 @@ class DataMenu(wx.Menu):
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start full crawl? It might a few hours.",
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
-        if self.crawler_already_run:
-            error(self.parent, "Please, restart the app.")
         if dialog.ShowModal() == wx.ID_YES:
-            self.crawler_already_run = True
             self.crawler_change(True)
 
             EVT_RESULT(self, self.onCrawlerDone)
