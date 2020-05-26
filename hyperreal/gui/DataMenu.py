@@ -16,8 +16,8 @@ from hyperreal.gui.Dialogues import ask, error
 
 
 class DataMenu(wx.Menu):
-
     item_list: List[MenuItem]
+
     def __init__(self, parent):
         super(DataMenu, self).__init__()
 
