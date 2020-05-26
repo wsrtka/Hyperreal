@@ -32,6 +32,7 @@ class ForumMenu(wx.Menu):
         self.Bind(wx.EVT_MENU, self.forum_popularity, forum_popularity)
 
     def forum_summary(self, _):
+        plt.clf()
         df = self.parent.data_frame.copy()
         data = stats.get_posts_per_year(df)
         self.parent.data_frame_cache = data
@@ -40,6 +41,7 @@ class ForumMenu(wx.Menu):
         self.parent.display((self.settings.temp_folder + "/plot.png", str(data)))
 
     def most_active_authors(self, _):
+        plt.clf()
         df = self.parent.data_frame.copy()
         data = stats.get_most_active_authors(df)
         self.parent.data_frame_cache = data
@@ -48,12 +50,14 @@ class ForumMenu(wx.Menu):
         self.parent.display((self.settings.temp_folder + "/plot.png", str(data)))
 
     def posts_distribution(self, _):
+        plt.clf()
         df = self.parent.data_frame.copy()
         data = stats.get_total_posts(df)
         self.parent.data_frame_cache = data
         self.parent.display((None, str(data)))
 
     def forum_popularity(self, _):
+        plt.clf()
         df = self.parent.data_frame.copy()
         forum_name = ask(message="What is the name of the forum you are interested in?")
         if forum_name:

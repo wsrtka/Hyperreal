@@ -26,9 +26,10 @@ class MainFrame(wx.Frame):
         self.data_menu = DataMenu(self)
         menubar.Append(self.data_menu, "Data")
 
-        self.data_dependent_menu = []
         forum_menu = ForumMenu(self)
         menubar.Append(forum_menu, "Forum")
+
+        self.data_dependent_menu = [forum_menu]
 
         self.update_menubar()
 
@@ -53,8 +54,11 @@ class MainFrame(wx.Frame):
         self.PopupMenu(PopupMenu(self), e.GetPosition())
 
     def update_menubar(self):
+        status = self.data_frame is not None
         for m in self.data_dependent_menu:
-            m.EnableTop(0, self.data_frame)
+            li = m.GetMenuItems()
+            for i in li:
+                i.Enable(status)
 
     def display(self, data: Tuple[str, str]):
         self.display_image(data[0])

@@ -20,10 +20,10 @@ res4, name = (stats.get_forum_popularity(df, 'inne-stymulanty'))
 # plotting test
 
 plot.plot_post_per_year(df)
-#plt.show()
+plt.show()
 
 plot.plot_author_activity(df)
-#plt.show()
+plt.show()
 
 # plot.plot_total_post_count_per_forum(res3)
 
