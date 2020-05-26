@@ -47,7 +47,11 @@ class DataMenu(wx.Menu):
         self.Append(filter_data)
         self.Bind(wx.EVT_MENU, self.filter_data, filter_data)
 
-        self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data]
+        abort_crawler = wx.MenuItem(self, -1, "Abort downloading data")
+        self.Append(abort_crawler)
+        self.Bind(wx.EVT_MENU, self.abort_crawler, abort_crawler)
+
+        self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data, abort_crawler]
         self.update_availability()
 
         self.crawler_thread = None
@@ -61,10 +65,14 @@ class DataMenu(wx.Menu):
         self.Enable(self.item_list[2].GetId(), not self.crawler_active)
         self.Enable(self.item_list[3].GetId(), not self.crawler_active)
         self.Enable(self.item_list[4].GetId(), self.parent.data_frame is not None)
+        self.Enable(self.item_list[5].GetId(), self.crawler_active)
 
     def crawler_change(self, b):
         self.crawler_active = b
         self.update_availability()
+
+    def abort_crawler(self, _):
+        self.crawler_thread.abort()
 
     def dynamic_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
