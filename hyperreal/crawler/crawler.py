@@ -10,16 +10,25 @@ import time
 
 
 def start_full_crawl(output_directory, notify_window):
+    """
+    Delete stored data and crawl entire hyperreal.info forum
+    :param output_directory: path to output directory
+    :param notify_window: xwPython window to notify when finished
+    :return: crawler thread
+    """
     p = mp.Process(target=_exec_full_crawl, args=output_directory)
-    # p.start()
-    # p.join()
     return CrawlerThread(p, False, output_directory, notify_window)
 
 
 def start_append_crawl(output_directory, date, notify_window):
+    """
+    Crawl posts from hyperreal.info forum created after given date
+    :param output_directory: path to the output directory
+    :param date: date, after which
+    :param notify_window: xwPython window to notify when finished
+    :return:
+    """
     p = mp.Process(target=_exec_append_crawl, args=(output_directory, date))
-    # p.start()
-    # p.join()
     return CrawlerThread(p, False, output_directory, notify_window)
 
 
@@ -61,9 +70,16 @@ class CrawlerThread:
         self.thread.notify = notify
 
     def abort(self):
+        """
+        Abort current crawl
+        """
         self.thread.wants_abort = True
 
     def start(self):
+        """
+        Begin crawl
+        :return:
+        """
         self.thread.start()
 
 
