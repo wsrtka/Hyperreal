@@ -7,56 +7,7 @@ from hyperreal.crawler.datautils import create_data_csv, append_data_csv
 from hyperreal.gui.events import CrawlerDoneEvent
 import wx
 import time
-
-
-def start_full_crawl(output_directory, notify_window):
-    """
-    Delete stored data and crawl entire hyperreal.info forum
-    :param output_directory: path to output directory
-    :param notify_window: xwPython window to notify when finished
-    :return: crawler thread
-    """
-    p = mp.Process(target=_exec_full_crawl, args=output_directory)
-    return CrawlerThread(p, False, output_directory, notify_window)
-
-
-def start_append_crawl(output_directory, date, notify_window):
-    """
-    Crawl posts from hyperreal.info forum created after given date
-    :param output_directory: path to the output directory
-    :param date: date, after which
-    :param notify_window: xwPython window to notify when finished
-    :return:
-    """
-    p = mp.Process(target=_exec_append_crawl, args=(output_directory, date))
-    return CrawlerThread(p, False, output_directory, notify_window)
-
-
-def _exec_full_crawl(output_dir):
-    settings = Settings()
-    settings_module = 'hyperreal.crawler.hypercrawler.settings'
-    os.environ['SCRAPY_SETTINGS_MODULE'] = settings_module
-    settings.setmodule(settings_module, priority='project')
-    settings.set('OUTPUT_DIRECTORY', output_dir)
-    settings.set('START_DATE', None)
-
-    process = CrawlerProcess(settings)
-    process.crawl('posts')
-    process.start()
-
-
-def _exec_append_crawl(output_dir, date):
-    settings = Settings()
-    settings_module = 'hyperreal.crawler.hypercrawler.settings'
-    os.environ['SCRAPY_SETTINGS_MODULE'] = settings_module
-    settings.setmodule(settings_module, priority='project')
-    settings.set('OUTPUT_DIRECTORY', output_dir)
-    settings.set('START_DATE', date)
-
-    process = CrawlerProcess(settings)
-    process.crawl('posts')
-    process.start()
-    wx.Abort()
+import datetime
 
 
 class CrawlerThread:
@@ -83,6 +34,56 @@ class CrawlerThread:
 
     def is_alive(self):
         return self.thread.is_alive()
+
+
+def start_full_crawl(output_directory: str, notify_window: wx.EvtHandler) -> CrawlerThread:
+    """
+    Delete stored data and crawl entire hyperreal.info forum
+    :param output_directory: path to output directory
+    :param notify_window: xwPython window to notify when finished
+    :return: crawler thread
+    """
+    p = mp.Process(target=_exec_full_crawl, args=output_directory)
+    return CrawlerThread(p, False, output_directory, notify_window)
+
+
+def start_append_crawl(output_directory: str, date: datetime.date, notify_window: wx.EvtHandler) -> CrawlerThread:
+    """
+    Crawl posts from hyperreal.info forum created after given date
+    :param output_directory: path to the output directory
+    :param date: date, after which
+    :param notify_window: xwPython window to notify when finished
+    :return:
+    """
+    p = mp.Process(target=_exec_append_crawl, args=(output_directory, date))
+    return CrawlerThread(p, False, output_directory, notify_window)
+
+
+def _exec_full_crawl(output_dir: str) -> None:
+    settings = Settings()
+    settings_module = 'hyperreal.crawler.hypercrawler.settings'
+    os.environ['SCRAPY_SETTINGS_MODULE'] = settings_module
+    settings.setmodule(settings_module, priority='project')
+    settings.set('OUTPUT_DIRECTORY', output_dir)
+    settings.set('START_DATE', None)
+
+    process = CrawlerProcess(settings)
+    process.crawl('posts')
+    process.start()
+
+
+def _exec_append_crawl(output_dir: str, date: datetime.date) -> None:
+    settings = Settings()
+    settings_module = 'hyperreal.crawler.hypercrawler.settings'
+    os.environ['SCRAPY_SETTINGS_MODULE'] = settings_module
+    settings.setmodule(settings_module, priority='project')
+    settings.set('OUTPUT_DIRECTORY', output_dir)
+    settings.set('START_DATE', date)
+
+    process = CrawlerProcess(settings)
+    process.crawl('posts')
+    process.start()
+    wx.Abort()
 
 
 class _CrawlerThread(Thread):

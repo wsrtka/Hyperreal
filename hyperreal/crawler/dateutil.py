@@ -2,7 +2,7 @@ import re
 from datetime import date, timedelta
 
 
-def parse_date(date_string):
+def parse_date(date_string: str) -> date:
     """
     Parse date from hyperreal.info format into python date
     :param date_string: date string, as found at the hyperreal.info forum
@@ -19,7 +19,7 @@ def parse_date(date_string):
     return result
 
 
-def _get_month(month_string):
+def _get_month(month: str) -> int:
     dates = {
         'stycznia': 1,
         'lutego': 2,
@@ -34,6 +34,6 @@ def _get_month(month_string):
         'listopada': 11,
         'grudnia': 12
     }
-    if month_string in dates:
-        return dates[month_string]
+    if month in dates:
+        return dates[month]
     return None

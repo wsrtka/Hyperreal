@@ -4,7 +4,6 @@ import shutil
 from typing import List
 import pandas as pd
 from datetime import date, datetime
-import threading
 
 from wx import MenuItem
 

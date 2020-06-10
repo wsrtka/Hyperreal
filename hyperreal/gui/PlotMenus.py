@@ -129,7 +129,7 @@ class NGramsMenu(wx.Menu):
             drug = ask(message="What drug do you want to know about?", default_value="marihuana")
             plt.clf()
             ngrams_total, ngrams_docfreq = self.create_dict()
-            stats.generate_word_cloud(drug, self.parent.data.frame['content'], self.narkopedia_map, ngrams_docfreq,
+            stats.generate_word_cloud(drug, self.parent.data_frame['content'], self.narkopedia_map, ngrams_docfreq,
                                       length=2)
             plt.savefig(self.settings.temp_folder + "/plot.png")
             self.parent.display((self.settings.temp_folder + "/plot.png", None))
