@@ -15,11 +15,13 @@ title = "Hyperreal"
 
 class MainFrame(wx.Frame):
     def __init__(self):
-        super().__init__(None, title=title)
+        super().__init__(None, title=title, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.settings = Settings()
         self.data_frame = None
         self.data_frame_cache = None
         self.raw_save = None
+
+        self.SetBackgroundColour("white")
 
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
@@ -50,8 +52,12 @@ class MainFrame(wx.Frame):
         self.text_panel = TextPanel(self)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.image_panel)
+
+        # self.sizer.AddStretchSpacer()
+        self.sizer.Add(self.image_panel, 0, wx.CENTER)
         self.sizer.Add(self.text_panel)
+        # self.sizer.AddStretchSpacer()
+
         self.SetSizer(self.sizer)
 
         self.can_switch = False
@@ -60,8 +66,6 @@ class MainFrame(wx.Frame):
         self.text_panel.Show(False)
 
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
-
-        self.SetSize((1000, 600))
 
     def on_right_down(self, e):
         self.PopupMenu(PopupMenu(self), e.GetPosition())
@@ -78,6 +82,8 @@ class MainFrame(wx.Frame):
         self.display_text(data[1])
         if data[0]:
             self.display_image()
+        else:
+            self.SetSize(1000, 600)
         self.can_switch = True if (data[0] and data[1]) else False
 
     def display_text(self, text: str = None):
@@ -143,6 +149,8 @@ class PopupMenu(wx.Menu):
 if __name__ == '__main__':
     app = wx.App()
     window = MainFrame()
+    #window.display(["temp/plot.png", "To start, load or download data from forums, and choose desired chart"])
     window.display([None, "To start, load or download data from forums, and choose desired chart"])
+    window.SetSize((400, 200))
     window.Show()
     app.MainLoop()
