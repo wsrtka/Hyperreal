@@ -3,6 +3,11 @@ from datetime import date, timedelta
 
 
 def parse_date(date_string):
+    """
+    Parse date from hyperreal.info format into python date
+    :param date_string: date string, as found at the hyperreal.info forum
+    :return: parsed date
+    """
     if 'dzisiaj' in date_string or 'temu' in date_string:
         result = date.today()
     elif 'wczoraj' in date_string:
