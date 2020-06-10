@@ -40,10 +40,9 @@ class HyperrealPipeline:
         self.topic_writer = csv.writer(self.topic_file)
         self.post_writer = csv.writer(self.post_file)
 
-    def close_spider(self) -> None:
+    def close_spider(self, _) -> None:
         """
         Called when spider finishes work. Closes output files
-        :param spider: Spider, which finished it's work
         """
         self.forum_file.close()
         self.topic_file.close()
