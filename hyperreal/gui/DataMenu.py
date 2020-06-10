@@ -84,11 +84,6 @@ class DataMenu(wx.Menu):
             self.parent.background_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl,
                                                                self)
             self.parent.background_thread.start()
-            # try:
-            #     start_append_crawl(self.settings.data_folder, self.settings.last_crawl)
-            #     append_data_csv(self.settings.data_folder)
-            # except Exception as exc:
-            #     error(self.parent, "Crawler failed: " + str(exc))
 
     def full_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -101,11 +96,6 @@ class DataMenu(wx.Menu):
             # self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
             self.parent.background_thread = start_full_crawl(self.settings.data_folder, self)
             self.parent.background_thread.start()
-            # try:
-            #     start_full_crawl(self.settings.data_folder)
-            #     create_data_csv(self.settings.data_folder)
-            # except Exception as err:
-            #     error(self.parent, "Crawler failed: " + str(err))
 
     def on_crawler_done(self, event):
         self.crawler_change(False)
@@ -165,4 +155,3 @@ class DataMenu(wx.Menu):
 
     def on_load_data_done(self, _):
         notify(message="Finished loading data")
-        self.parent.background_thread = None

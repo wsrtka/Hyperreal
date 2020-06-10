@@ -105,7 +105,7 @@ class MainFrame(wx.Frame):
         self.Layout()
 
     def start_background_task(self, function):
-        if self.background_thread:
+        if self.background_thread and self.background_thread.is_alive():
             error(self, "Background operation already running.")
         else:
             self.background_thread = threading.Thread(target=function)

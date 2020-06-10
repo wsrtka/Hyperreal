@@ -82,6 +82,9 @@ class CrawlerThread:
         """
         self.thread.start()
 
+    def is_alive(self):
+        return self.thread.is_alive()
+
 
 class _CrawlerThread(Thread):
     def run(self):
