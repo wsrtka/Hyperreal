@@ -61,9 +61,9 @@ class DataMenu(wx.Menu):
 
     def update_availability(self):
         self.Enable(self.item_list[0].GetId(), self.get_data_availability())
-        self.Enable(self.item_list[1].GetId(), self.get_data_availability())
+        self.Enable(self.item_list[1].GetId(), self.get_data_availability() and not self.crawler_active)
         self.Enable(self.item_list[2].GetId(), not self.crawler_active)
-        self.Enable(self.item_list[3].GetId(), not self.crawler_active)
+        self.Enable(self.item_list[3].GetId(), not self.crawler_active and self.get_data_availability())
         self.Enable(self.item_list[4].GetId(), self.parent.data_frame is not None)
         self.Enable(self.item_list[5].GetId(), self.crawler_active)
 
@@ -88,11 +88,11 @@ class DataMenu(wx.Menu):
             #     append_data_csv(self.settings.data_folder)
             # except Exception as exc:
             #     error(self.parent, "Crawler failed: " + str(exc))
-            self.crawler_change(False)
+
 
     def full_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
-                                  "Are you sure you want to start full crawl? It might a few hours.",
+                                  "Are you sure you want to start full crawl? It might take a few hours.",
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
         if dialog.ShowModal() == wx.ID_YES:
             self.crawler_change(True)
@@ -106,9 +106,9 @@ class DataMenu(wx.Menu):
             #     create_data_csv(self.settings.data_folder)
             # except Exception as err:
             #     error(self.parent, "Crawler failed: " + str(err))
-            self.crawler_change(False)
 
     def onCrawlerDone(self, event):
+        self.crawler_change(False)
         if event.aborted:
             error(message="Crawler aborted", caption="Warning")
         else:
