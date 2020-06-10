@@ -1,5 +1,4 @@
 import os
-# from builtins import function
 from shutil import copyfile
 from typing import List
 import threading
@@ -114,17 +113,22 @@ class MainFrame(wx.Frame):
         if self.background_thread and self.background_thread.is_alive():
             error(self, "Background operation already running.")
         else:
-            self.update_menubar(False)
             self.background_thread = threading.Thread(target=function)
             self.background_thread.start()
             window.display([None, message])
+            self.update_menubar(False)
 
     def is_background_task_running(self) -> bool:
-        return self.background_thread and self.background_thread.is_alive()
+        res = self.background_thread and self.background_thread.is_alive()
+        if res is None:
+            return False
+        else:
+            return res
 
     def abort_background_task(self) -> None:
         if self.background_thread:
             self.background_thread.abort()
+            self.update_menubar()
 
 
 class PopupMenu(wx.Menu):

@@ -46,9 +46,9 @@ class DataMenu(wx.Menu):
         self.Append(filter_data)
         self.Bind(wx.EVT_MENU, self.filter_data, filter_data)
 
-        abort_crawler = wx.MenuItem(self, -1, "Abort downloading data")
+        abort_crawler = wx.MenuItem(self, -1, "Abort operation")
         self.Append(abort_crawler)
-        self.Bind(wx.EVT_MENU, self.abort_crawler, abort_crawler)
+        self.Bind(wx.EVT_MENU, self.abort_operation, abort_crawler)
 
         self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data, abort_crawler]
         self.update_availability()
@@ -70,7 +70,7 @@ class DataMenu(wx.Menu):
         self.crawler_active = b
         self.update_availability()
 
-    def abort_crawler(self, _):
+    def abort_operation(self, _):
         self.parent.abort_background_task()
 
     def dynamic_crawl(self, _):
