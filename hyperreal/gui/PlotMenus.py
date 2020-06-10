@@ -108,17 +108,17 @@ class NGramsMenu(wx.Menu):
         return ngram_dict(content_df)
 
     def only_chars(self, res):
-        self.parent.raw_save = str(res)
+        self.parent.raw_save = ", ".join(res)
         self.parent.display((None, self.parent.raw_save))
 
     def narco_names(self, _):
         self.parent.data_frame_cache = None
-        self.only_chars(", ".join(self.narkopedia_map.keys()))
+        self.only_chars(self.narkopedia_map.keys())
 
     def drug_aliases(self, _):
         drug = ask(message="What drug do you want to know about?", default_value="marihuana")
         self.parent.data_frame_cache = None
-        self.only_chars(", ".join(self.narkopedia_map[drug]))
+        self.only_chars(self.narkopedia_map[drug])
 
     def drug_ngram(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -165,7 +165,7 @@ class NLPMenu(wx.Menu):
         return self.model_after
 
     def only_chars(self, res):
-        self.parent.raw_save = str(res)
+        self.parent.raw_save = ", ".join(res)
         self.parent.display((None, self.parent.raw_save))
 
     def new_drug_names(self, e):
