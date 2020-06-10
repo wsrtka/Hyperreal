@@ -162,3 +162,4 @@ class DataMenu(wx.Menu):
 
     def on_load_data_done(self, _):
         notify(message="Finished loading data")
+        self.parent.display([None, "Finished loading data"])

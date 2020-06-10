@@ -2,9 +2,9 @@ import os
 from shutil import copyfile
 from typing import List
 import threading
-
 import wx
 
+import hyperreal.gui.events as events
 from hyperreal.gui.DataMenu import DataMenu
 from hyperreal.gui.Dialogues import error, ask
 from hyperreal.gui.Panels import ImagePanel, TextPanel
@@ -42,10 +42,10 @@ class MainFrame(wx.Frame):
 
         self.data_dependent_menu = [forum_menu]
 
-        if self.settings.narcopedia_file:
+        if os.path.isfile(self.settings.narcopedia_file):
             self.data_dependent_menu.append(ngram_menu)
 
-        if self.settings.model_file:
+        if os.path.isfile(self.settings.narcopedia_file):
             self.data_dependent_menu.append(nlp_menu)
 
         self.update_menubar()
@@ -72,8 +72,9 @@ class MainFrame(wx.Frame):
     def on_right_down(self, e):
         self.PopupMenu(PopupMenu(self), e.GetPosition())
 
-    def update_menubar(self):
-        status = self.data_frame is not None
+    def update_menubar(self, value=False):
+        self.data_menu.update_availability()
+        status = self.data_frame is not None or value
         for m in self.data_dependent_menu:
             li = m.GetMenuItems()
             for i in li:
@@ -85,7 +86,10 @@ class MainFrame(wx.Frame):
         if data[0]:
             self.display_image()
         else:
-            self.SetSize(1000, 600)
+            if len(data[1]) > 1000:
+                self.SetSize(1000, 600)
+            else:
+                self.SetSize((400, 200))
         self.can_switch = True if (data[0] and data[1]) else False
 
     def display_text(self, text: str = None):
@@ -108,8 +112,10 @@ class MainFrame(wx.Frame):
         if self.background_thread and self.background_thread.is_alive():
             error(self, "Background operation already running.")
         else:
+            self.update_menubar(False)
             self.background_thread = threading.Thread(target=function)
             self.background_thread.start()
+            window.display([None, "Operation in progress"])
 
     def is_background_task_running(self):
         return self.background_thread and self.background_thread.is_alive()
@@ -166,7 +172,6 @@ if __name__ == '__main__':
     app = wx.App()
     window = MainFrame()
     # window.display(["temp/plot.png", "To start, load or download data from forums, and choose desired chart"])
-    window.display([None, "To start, load or download data from forums, and choose desired chart"])
-    window.SetSize((400, 200))
+    window.display([None, "To start, load or download data from forums, then choose desired chart"])
     window.Show()
     app.MainLoop()
