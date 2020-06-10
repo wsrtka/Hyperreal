@@ -1,6 +1,7 @@
 import os
 from shutil import copyfile
 from typing import List
+import threading
 
 import wx
 
@@ -20,6 +21,7 @@ class MainFrame(wx.Frame):
         self.data_frame = None
         self.data_frame_cache = None
         self.raw_save = None
+        self.background_thread = None
 
         self.SetBackgroundColour("white")
 
@@ -102,6 +104,13 @@ class MainFrame(wx.Frame):
         self.text_panel.Show(False)
         self.Layout()
 
+    def start_background_task(self, function):
+        if self.background_thread:
+            error(self, "Background operation already running.")
+        else:
+            self.background_thread = threading.Thread(target=function)
+            self.background_thread.start()
+
 
 class PopupMenu(wx.Menu):
     parent: MainFrame
@@ -149,7 +158,7 @@ class PopupMenu(wx.Menu):
 if __name__ == '__main__':
     app = wx.App()
     window = MainFrame()
-    #window.display(["temp/plot.png", "To start, load or download data from forums, and choose desired chart"])
+    # window.display(["temp/plot.png", "To start, load or download data from forums, and choose desired chart"])
     window.display([None, "To start, load or download data from forums, and choose desired chart"])
     window.SetSize((400, 200))
     window.Show()

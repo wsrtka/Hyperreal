@@ -4,12 +4,12 @@ import shutil
 from typing import List
 import pandas as pd
 from datetime import date, datetime
+import threading
 
 from wx import MenuItem
 
-from hyperreal.crawler.events import EVT_RESULT
+import hyperreal.gui.events as events
 from hyperreal.crawler.crawler import start_append_crawl, start_full_crawl
-from hyperreal.crawler.datautils import create_data_csv, append_data_csv
 import hyperreal.datautils.preprocess as preprocess
 
 from hyperreal.gui.Dialogues import ask, error, notify
@@ -54,7 +54,7 @@ class DataMenu(wx.Menu):
         self.item_list = [load_data, dynamic_crawl, full_crawl, invalidate_data, filter_data, abort_crawler]
         self.update_availability()
 
-        self.crawler_thread = None
+        self.parent.background_thread = None
 
     def get_data_availability(self):
         return not self.crawler_active and os.path.isfile(self.settings.data_folder + "/data.csv")
@@ -72,7 +72,7 @@ class DataMenu(wx.Menu):
         self.update_availability()
 
     def abort_crawler(self, _):
-        self.crawler_thread.abort()
+        self.parent.background_thread.abort()
 
     def dynamic_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -80,15 +80,15 @@ class DataMenu(wx.Menu):
                                   "Start dynamic crawl", wx.YES_NO | wx.ICON_QUESTION)
         if dialog.ShowModal() == wx.ID_YES:
             self.crawler_change(True)
-            EVT_RESULT(self, self.onCrawlerDone)
-            self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
-            self.crawler_thread.start()
+            events.connect_event(self, self.on_crawler_done, events.CRAWLER_DONE_ID)
+            self.parent.background_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl,
+                                                               self)
+            self.parent.background_thread.start()
             # try:
             #     start_append_crawl(self.settings.data_folder, self.settings.last_crawl)
             #     append_data_csv(self.settings.data_folder)
             # except Exception as exc:
             #     error(self.parent, "Crawler failed: " + str(exc))
-
 
     def full_crawl(self, _):
         dialog = wx.MessageDialog(self.parent,
@@ -97,17 +97,17 @@ class DataMenu(wx.Menu):
         if dialog.ShowModal() == wx.ID_YES:
             self.crawler_change(True)
 
-            EVT_RESULT(self, self.onCrawlerDone)
+            events.connect_event(self, self.on_crawler_done, events.CRAWLER_DONE_ID)
             # self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
-            self.crawler_thread = start_full_crawl(self.settings.data_folder, self)
-            self.crawler_thread.start()
+            self.parent.background_thread = start_full_crawl(self.settings.data_folder, self)
+            self.parent.background_thread.start()
             # try:
             #     start_full_crawl(self.settings.data_folder)
             #     create_data_csv(self.settings.data_folder)
             # except Exception as err:
             #     error(self.parent, "Crawler failed: " + str(err))
 
-    def onCrawlerDone(self, event):
+    def on_crawler_done(self, event):
         self.crawler_change(False)
         if event.aborted:
             error(message="Crawler aborted", caption="Warning")
@@ -153,8 +153,16 @@ class DataMenu(wx.Menu):
 
     def load_data(self, _):
         if self.get_data_availability():
-            df = pd.read_csv(self.settings.data_folder + "/data.csv")
-            self.parent.data_frame = preprocess.data_pre(df)
-            self.update_availability()
-            self.parent.update_menubar()
-            notify(message="Finished loading data")
+            events.connect_event(self, self.on_load_data_done, events.DATA_LOAD_DONE)
+            self.parent.start_background_task(self.exec_load_data)
+
+    def exec_load_data(self):
+        df = pd.read_csv(self.settings.data_folder + "/data.csv")
+        self.parent.data_frame = preprocess.data_pre(df)
+        self.update_availability()
+        self.parent.update_menubar()
+        wx.PostEvent(self, events.AsyncOperationDoneEvent(events.DATA_LOAD_DONE))
+
+    def on_load_data_done(self, _):
+        notify(message="Finished loading data")
+        self.parent.background_thread = None

@@ -4,7 +4,7 @@ import os
 import multiprocessing as mp
 from threading import Thread
 from hyperreal.crawler.datautils import create_data_csv, append_data_csv
-from hyperreal.crawler.events import CrawlerDoneEvent
+from hyperreal.gui.events import CrawlerDoneEvent
 import wx
 import time
 
