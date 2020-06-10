@@ -2,9 +2,10 @@ import os
 import csv
 from hyperreal.crawler.constants import *
 from hyperreal.crawler.crawler_error import *
+import typing
 
 
-def create_data_csv(folder):
+def create_data_csv(folder: str) -> None:
     """
     Create data.csv file from scrapped data and saves result in the given folder
     :param folder: folder with scrapped data: forums.csv, topics.csv, posts.csv
@@ -21,7 +22,7 @@ def create_data_csv(folder):
         _process_posts(data_file, posts_file, forums_dict, topics_dict)
 
 
-def append_data_csv(folder):
+def append_data_csv(folder: str) -> None:
     """
     Append newly scrapped data into existing data csv file
     :param folder: folder with scrapped and processed data: data.csv, forums.csv, forums_append.csv, topics.csv, topics_append.csv, posts.csv, posts_append.csv
@@ -47,19 +48,19 @@ def append_data_csv(folder):
         _append_posts(posts_append_file, posts_keys, forums_dict, topics_dict, data_file)
 
 
-def _load_element_dict(folder_name, file_name, element_format):
+def _load_element_dict(folder_name: str, file_name: str, element_format: dict) -> dict:
     with open(os.path.join(folder_name, file_name), 'r', encoding="utf-8") as file:
         return _create_element_dict(file, element_format)
 
 
-def _create_element(row, element_format):
+def _create_element(row: list, element_format: dict) -> dict:
     element = {}
     for key in element_format.keys():
         element[key] = row[element_format[key]]
     return element
 
 
-def _create_element_dict(file, element_format):
+def _create_element_dict(file: typing.IO, element_format: dict) -> dict:
     csv_reader = csv.reader(file)
     csv_dict = {}
     for row in csv_reader:
@@ -67,7 +68,7 @@ def _create_element_dict(file, element_format):
     return csv_dict
 
 
-def _append_element_dict(current_dict, file, element_format):
+def _append_element_dict(current_dict: dict, file: typing.IO, element_format: dict) -> None:
     csv_reader = csv.reader(file)
     for row in csv_reader:
         element = _create_element(row, element_format)
@@ -75,20 +76,20 @@ def _append_element_dict(current_dict, file, element_format):
             current_dict[element['id']] = element
 
 
-def _get_topic(p, topics_dict):
+def _get_topic(p: list, topics_dict: dict) -> dict:
     if p[POSTS_FORMAT['thread_id']] not in topics_dict:
         return None
     return topics_dict[p[POSTS_FORMAT['thread_id']]]
 
 
-def _get_forum(p, forums_dict, topics_dict):
+def _get_forum(p: list, forums_dict: dict, topics_dict: dict) -> dict:
     topic = _get_topic(p, topics_dict)
     if topic is None or topic['forum_id'] not in forums_dict:
         return None
     return forums_dict[topic['forum_id']]
 
 
-def _create_data_line(post, topic, forum):
+def _create_data_line(post: list, topic: dict, forum: dict) -> list:
     data_line = [None] * 9
     data_line[DATA_FORMAT["post_id"]] = post[POSTS_FORMAT["post_id"]]
     data_line[DATA_FORMAT["thread_id"]] = post[POSTS_FORMAT["thread_id"]]
@@ -102,7 +103,7 @@ def _create_data_line(post, topic, forum):
     return data_line
 
 
-def _process_posts(data_file, posts_file, forums_dict, topics_dict):
+def _process_posts(data_file: typing.IO, posts_file: typing.IO, forums_dict: dict, topics_dict: dict) -> None:
     csv_writer = csv.writer(data_file)
     csv_post_reader = csv.reader(posts_file)
 
@@ -120,7 +121,7 @@ def _process_posts(data_file, posts_file, forums_dict, topics_dict):
         csv_writer.writerow(_create_data_line(post, topic, forum))
 
 
-def _load_post_keys(data_file):
+def _load_post_keys(data_file: typing.IO) -> dict:
     csv_reader = csv.reader(data_file)
     posts = {}
     for row in csv_reader:
@@ -128,7 +129,8 @@ def _load_post_keys(data_file):
     return posts
 
 
-def _append_posts(posts_file, posts_keys, forums_dict, topics_dict, data_file):
+def _append_posts(posts_file: typing.IO, posts_keys: dict, forums_dict: dict, topics_dict: dict,
+                  data_file: typing.IO) -> None:
     csv_post_reader = csv.reader(posts_file)
     csv_writer = csv.writer(data_file)
     for post in csv_post_reader:
@@ -145,7 +147,7 @@ def _append_posts(posts_file, posts_keys, forums_dict, topics_dict, data_file):
         csv_writer.writerow(_create_data_line(post, topic, forum))
 
 
-def _create_csv_header(element_format):
+def _create_csv_header(element_format: dict) -> list:
     header = [None] * (len(element_format))
 
     for key in element_format.keys():

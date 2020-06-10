@@ -1,5 +1,6 @@
 import scrapy
 from scrapy.loader import ItemLoader
+from scrapy.http.response import Response
 from hyperreal.crawler.hypercrawler.items import *
 from hyperreal.crawler.dateutil import parse_date
 
@@ -17,7 +18,7 @@ class PostSpider(scrapy.Spider):
     allowed_domains = ["hyperreal.info"]
     start_urls = ["https://hyperreal.info/talk/"]
 
-    def parse(self, response):
+    def parse(self, response: Response) -> None:
         """
         Default scrapy callback. To be used on forum main page.
         Follows subforum links.
@@ -36,7 +37,7 @@ class PostSpider(scrapy.Spider):
             next_request = response.urljoin(forum)
             yield scrapy.Request(next_request, callback=self.parse_forum)
 
-    def parse_forum(self, response):
+    def parse_forum(self, response: Response) -> None:
         """
         Forum callback. Parses ForumItem.
         Follows subforum links and thread links (through self.parse_forum_page() method).
@@ -54,7 +55,7 @@ class PostSpider(scrapy.Spider):
 
         yield from self.parse_forum_page(response, response.url)
 
-    def parse_forum_page(self, response, forum_url=None):
+    def parse_forum_page(self, response: Response, forum_url: str = None) -> None:
         """
         Forum page callback. Parses TopicItem.
         Follows next forum page and threads.
@@ -97,7 +98,7 @@ class PostSpider(scrapy.Spider):
             yield scrapy.Request(next_request, callback=self.parse_forum_page,
                                  meta={'forum_url': forum_url})
 
-    def parse_thread(self, response):
+    def parse_thread(self, response: Response) -> None:
         """
         Thread page callback. Parses PostItem.
         Follows next thread page.

@@ -4,6 +4,8 @@ import re
 import w3lib.html
 import os
 from hyperreal.crawler.constants import *
+import scrapy
+import typing
 
 
 class HyperrealPipeline:
@@ -17,13 +19,12 @@ class HyperrealPipeline:
         self.output_directory = output_directory
         self.start_date = start_date
 
-    def open_spider(self, start_requests):
+    def open_spider(self, _) -> None:
         """
         Called during spider startup. Opens and truncates output files and prepares csv writers.
-        :param start_requests: Starting requests for the spider
         """
 
-        def open_output_file(file_name):
+        def open_output_file(file_name: str) -> typing.IO:
             return open(os.path.join(self.output_directory, file_name), 'w', newline='', encoding='utf-8')
 
         if self.start_date is None:
@@ -39,7 +40,7 @@ class HyperrealPipeline:
         self.topic_writer = csv.writer(self.topic_file)
         self.post_writer = csv.writer(self.post_file)
 
-    def close_spider(self, spider):
+    def close_spider(self) -> None:
         """
         Called when spider finishes work. Closes output files
         :param spider: Spider, which finished it's work
@@ -48,12 +49,11 @@ class HyperrealPipeline:
         self.topic_file.close()
         self.post_file.close()
 
-    def process_item(self, item, spider):
+    def process_item(self, item: scrapy.Item, _) -> scrapy.Item:
         """
         Processes scraped item and saves it in a output file accordingly
         :param item: Item to process. Might be a :class:`hyperreal.crawler.hypercrawler.items.PostItem`,
         :class:`hyperreal.crawler.hypercrawler.items.ForumItem` or :class:`hypercrawler.items.TopicItem`
-        :param spider: a spider
         """
         if isinstance(item, ForumItem):
             return self.handle_forum(item)
@@ -63,7 +63,7 @@ class HyperrealPipeline:
             return self.handle_post(item)
         return item
 
-    def handle_forum(self, item):
+    def handle_forum(self, item: scrapy.Item) -> scrapy.Item:
         """
         Process ForumItem and save it to the output file
         :param item: ForumItem to process
@@ -75,7 +75,7 @@ class HyperrealPipeline:
             self.forum_writer.writerow([link, item['name'][0], forum_id_match.group(1)])
         return item
 
-    def handle_topic(self, item):
+    def handle_topic(self, item: scrapy.Item) -> scrapy.Item:
         """
         Process TopicItem and save it to the output file
         :param item: TopicItem to process
@@ -86,7 +86,7 @@ class HyperrealPipeline:
                 [item['id'][0], forum_id_match.group(1), item['thread_link'][0], item['name'][0]])
         return item
 
-    def handle_post(self, item):
+    def handle_post(self, item: scrapy.Item) -> scrapy.Item:
         """
         Process PostItem and save it to the output file
         :param item: PostItem

@@ -1,8 +1,10 @@
 import os
+# from builtins import function
 from shutil import copyfile
 from typing import List
 import threading
 import wx
+import typing
 
 import hyperreal.gui.events as events
 from hyperreal.gui.DataMenu import DataMenu
@@ -108,19 +110,19 @@ class MainFrame(wx.Frame):
         self.text_panel.Show(False)
         self.Layout()
 
-    def start_background_task(self, function):
+    def start_background_task(self, function: typing.Callable, message: str = "Operation in progress...") -> None:
         if self.background_thread and self.background_thread.is_alive():
             error(self, "Background operation already running.")
         else:
             self.update_menubar(False)
             self.background_thread = threading.Thread(target=function)
             self.background_thread.start()
-            window.display([None, "Operation in progress"])
+            window.display([None, message])
 
-    def is_background_task_running(self):
+    def is_background_task_running(self) -> bool:
         return self.background_thread and self.background_thread.is_alive()
 
-    def abort_background_task(self):
+    def abort_background_task(self) -> None:
         if self.background_thread:
             self.background_thread.abort()
 
