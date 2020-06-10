@@ -1,4 +1,5 @@
 import wx
+import os
 
 import hyperreal.overview.stats as stats
 import hyperreal.overview.plotting as plot
@@ -81,10 +82,6 @@ class NGramsMenu(wx.Menu):
         self.parent = parent
         self.settings = parent.settings
 
-        if self.settings.narcopedia_file:
-            self.narkopedia_df = get_narkopedia(self.settings.narcopedia_file)
-            self.narkopedia_map = get_narkopedia_map(self.narkopedia_df)
-
         narco_names = wx.MenuItem(self, -1, "Narcotics names")
         self.Append(narco_names)
         self.Bind(wx.EVT_MENU, self.narco_names, narco_names)
@@ -97,7 +94,10 @@ class NGramsMenu(wx.Menu):
         self.Append(drug_ngram)
         self.Bind(wx.EVT_MENU, self.drug_ngram, drug_ngram)
 
-        if not self.settings.narcopedia_file:
+        if os.path.isfile(self.settings.narcopedia_file):
+            self.narkopedia_df = get_narkopedia(self.settings.narcopedia_file)
+            self.narkopedia_map = get_narkopedia_map(self.narkopedia_df)
+        else:
             narco_names.Enable(False)
             drug_aliases.Enable(False)
             drug_ngram.Enable(False)
@@ -142,10 +142,6 @@ class NLPMenu(wx.Menu):
         self.parent = parent
         self.settings = parent.settings
 
-        if self.settings.model_file:
-            self.model = load_model_from_file(self.settings.model_file)
-            self.model_after = None
-
         new_drug_names = wx.MenuItem(self, -1, "New drug names")
         self.Append(new_drug_names)
         self.Bind(wx.EVT_MENU, self.new_drug_names, new_drug_names)
@@ -154,7 +150,10 @@ class NLPMenu(wx.Menu):
         self.Append(symptoms)
         self.Bind(wx.EVT_MENU, self.symptoms, symptoms)
 
-        if not self.settings.model_file:
+        if os.path.isfile(self.settings.model_file):
+            self.model = load_model_from_file(self.settings.model_file)
+            self.model_after = None
+        else:
             new_drug_names.Enable(False)
             symptoms.Enable(False)
 

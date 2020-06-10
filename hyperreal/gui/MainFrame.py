@@ -1,6 +1,6 @@
 import os
 from shutil import copyfile
-from typing import Tuple
+from typing import List
 
 import wx
 
@@ -73,7 +73,7 @@ class MainFrame(wx.Frame):
             for i in li:
                 i.Enable(status)
 
-    def display(self, data: Tuple[str, str]):
+    def display(self, data: List[str]):
         self.display_image(data[0])
         self.display_text(data[1])
         if data[0]:
@@ -143,5 +143,6 @@ class PopupMenu(wx.Menu):
 if __name__ == '__main__':
     app = wx.App()
     window = MainFrame()
+    window.display([None, "To start, load or download data from forums, and choose desired chart"])
     window.Show()
     app.MainLoop()

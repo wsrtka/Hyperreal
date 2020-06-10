@@ -7,7 +7,7 @@ class ImagePanel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)
-        image = wx.Image(240, 240)
+        image = wx.Image(1, 1)
         self.photo_max_size = 900
         self.image_control = wx.StaticBitmap(self, wx.ID_ANY, wx.Bitmap(image))
 

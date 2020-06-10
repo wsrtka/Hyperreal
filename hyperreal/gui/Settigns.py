@@ -34,7 +34,8 @@ class Settings:
         with open(settings_file, "w") as f:
             f.write(json.dumps(new_json))
 
-    def _ensure_dir_exists(self, path):
+    @staticmethod
+    def _ensure_dir_exists(path):
         if not os.path.exists(path):
             try:
                 os.mkdir(path)
