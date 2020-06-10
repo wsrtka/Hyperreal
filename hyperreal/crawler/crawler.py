@@ -46,7 +46,6 @@ def _exec_full_crawl(output_dir):
 
 
 def _exec_append_crawl(output_dir, date):
-    print('running')
     settings = Settings()
     settings_module = 'hyperreal.crawler.hypercrawler.settings'
     os.environ['SCRAPY_SETTINGS_MODULE'] = settings_module

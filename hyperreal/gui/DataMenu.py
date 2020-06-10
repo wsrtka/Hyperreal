@@ -72,9 +72,13 @@ class DataMenu(wx.Menu):
         self.update_availability()
 
     def abort_crawler(self, _):
-        self.parent.background_thread.abort()
+        self.parent.abort_background_task()
 
     def dynamic_crawl(self, _):
+        if self.parent.is_background_task_running():
+            error(self.parent, "Background task already running")
+            return
+
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start dynamic crawl? It might take a while.",
                                   "Start dynamic crawl", wx.YES_NO | wx.ICON_QUESTION)
@@ -86,6 +90,10 @@ class DataMenu(wx.Menu):
             self.parent.background_thread.start()
 
     def full_crawl(self, _):
+        if self.parent.is_background_task_running():
+            error(self.parent, "Background task already running")
+            return
+
         dialog = wx.MessageDialog(self.parent,
                                   "Are you sure you want to start full crawl? It might take a few hours.",
                                   "Start full crawl", wx.YES_NO | wx.ICON_QUESTION)
@@ -93,14 +101,13 @@ class DataMenu(wx.Menu):
             self.crawler_change(True)
 
             events.connect_event(self, self.on_crawler_done, events.CRAWLER_DONE_ID)
-            # self.crawler_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl, self)
             self.parent.background_thread = start_full_crawl(self.settings.data_folder, self)
             self.parent.background_thread.start()
 
     def on_crawler_done(self, event):
         self.crawler_change(False)
         if event.aborted:
-            error(message="Crawler aborted", caption="Warning")
+            notify(message="Crawler aborted")
         else:
             notify(message="Crawler finished")
         self.settings.last_crawl = date.today()

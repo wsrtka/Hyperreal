@@ -111,6 +111,13 @@ class MainFrame(wx.Frame):
             self.background_thread = threading.Thread(target=function)
             self.background_thread.start()
 
+    def is_background_task_running(self):
+        return self.background_thread and self.background_thread.is_alive()
+
+    def abort_background_task(self):
+        if self.background_thread:
+            self.background_thread.abort()
+
 
 class PopupMenu(wx.Menu):
     parent: MainFrame
