@@ -1,5 +1,6 @@
 import wx
 import os
+import functools
 
 import hyperreal.overview.stats as stats
 import hyperreal.overview.plotting as plot
@@ -112,12 +113,12 @@ class NGramsMenu(wx.Menu):
 
     def narco_names(self, _):
         self.parent.data_frame_cache = None
-        self.only_chars(self.narkopedia_map.keys())
+        self.only_chars(", ".join(self.narkopedia_map.keys()))
 
     def drug_aliases(self, _):
         drug = ask(message="What drug do you want to know about?", default_value="marihuana")
         self.parent.data_frame_cache = None
-        self.only_chars(self.narkopedia_map[drug])
+        self.only_chars(", ".join(self.narkopedia_map[drug]))
 
     def drug_ngram(self, _):
         dialog = wx.MessageDialog(self.parent,

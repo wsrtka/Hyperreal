@@ -142,8 +142,8 @@ class PopupMenu(wx.Menu):
             if self.parent.data_frame_cache:
                 self.parent.data_frame_cache.to_csv(path + "/%s.csv" % name)
             else:
-                with open(path + "/%s.txt" % name, "wb") as text_file:
-                    text_file.write(self.parent.raw_save.encode('UTF8'))
+                with open(path + "/%s.csv" % name, "wb") as text_file:
+                    text_file.write(self.parent.raw_save.replace(", ", "\n").encode('UTF8'))
 
 
 if __name__ == '__main__':
