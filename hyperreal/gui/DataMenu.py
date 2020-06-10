@@ -87,6 +87,7 @@ class DataMenu(wx.Menu):
             self.parent.background_thread = start_append_crawl(self.settings.data_folder, self.settings.last_crawl,
                                                                self)
             self.parent.background_thread.start()
+            self.parent.display([None, "Downloading forum data..."])
 
     def full_crawl(self, _):
         if self.parent.is_background_task_running():
@@ -102,13 +103,16 @@ class DataMenu(wx.Menu):
             events.connect_event(self, self.on_crawler_done, events.CRAWLER_DONE_ID)
             self.parent.background_thread = start_full_crawl(self.settings.data_folder, self)
             self.parent.background_thread.start()
+            self.parent.display([None, "Downloading forum data..."])
 
     def on_crawler_done(self, event):
         self.crawler_change(False)
         if event.aborted:
             notify(message="Crawler aborted")
+            self.parent.display([None, "Data download aborted."])
         else:
             notify(message="Crawler finished")
+            self.parent.display([None, "Data download finished."])
         self.settings.last_crawl = date.today()
         self.settings.save()
 
@@ -150,7 +154,7 @@ class DataMenu(wx.Menu):
     def load_data(self, _):
         if self.get_data_availability():
             events.connect_event(self, self.on_load_data_done, events.DATA_LOAD_DONE)
-            self.parent.start_background_task(self.exec_load_data)
+            self.parent.start_background_task(self.exec_load_data, "Loading data...")
 
     def exec_load_data(self):
         df = pd.read_csv(self.settings.data_folder + "/data.csv")
