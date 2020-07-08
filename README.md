@@ -8,6 +8,7 @@ Details on how to use this project are included in our [wiki](https://github.com
 Original project authors:
 - Jakub Darul
 - Łukasz Kaźmierczak
+
 Project expanded by:
 - Witold Serwatka [wsrtka](https://github.com/wsrtka)
 - Hubert Balcerzak [HubertBalcerzak](https://github.com/HubertBalcerzak)
